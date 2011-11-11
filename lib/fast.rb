@@ -14,7 +14,7 @@ module Fast
     if options
       if options[:extension]
         filtered = []
-        Dir.entries(path).each do |entry|
+        ::Dir.entries(path).each do |entry|
           if entry.end_with? ".#{options[:extension]}"
             if options[:strip_extension]
               filtered << entry[0..-("#{options[:extension]}".length)-2]
@@ -26,7 +26,7 @@ module Fast
         return filtered
       end
     else
-      Dir.entries path
+      ::Dir.entries path
     end
   end
   
@@ -52,10 +52,9 @@ module Fast
     def self.mkdir path
       path.split("/").each do |part|
         route ||= part
-        Dir.mkdir route unless route == "" || ::File.directory?( route )
+        ::Dir.mkdir route unless route == "" || ::File.directory?( route )
         route += "/#{path}"
       end
-      # Dir.mkdir path # It seems this was redundant
     end
 end
 
