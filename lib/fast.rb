@@ -1,6 +1,7 @@
 require "metafun/delegator"
 
 require "fast/file"
+require "fast/dir"
 
 module Fast
   # Returns the list of entries in the directory
@@ -31,7 +32,7 @@ module Fast
   
   # Like `dir`, but creates the directory if it does not exist
   def self.dir! path, options = nil
-    mkdir path unless Dir.exist? path
+    mkdir path unless dir? path
     dir path, options
   end
   
@@ -51,10 +52,10 @@ module Fast
     def self.mkdir path
       path.split("/").each do |part|
         route ||= part
-        Dir.mkdir route unless route == "" || Dir.exist?( route )
+        Dir.mkdir route unless route == "" || ::File.directory?( route )
         route += "/#{path}"
       end
-      Dir.mkdir path
+      # Dir.mkdir path # It seems this was redundant
     end
 end
 
