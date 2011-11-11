@@ -175,4 +175,40 @@ describe Fast::File do
       ::File.unlink "demo_txt"
     end
   end  
+  
+  describe "#read" do
+    context "the file exists" do
+      it "should return all the contents of the file" do
+        ::File.should_not exist "demo.txt"
+        Fast::File.new.append "demo.txt", "New content!"
+        Fast::File.new.read( "demo.txt" ).should == "New content!"
+        ::File.unlink "demo.txt"
+      end
+    
+      it "should change the atime of the file" do
+        ::File.should_not exist "demo.txt"
+        Fast::File.new.append "demo.txt", "New content!"
+        atime = ::File.atime "demo.txt"
+        sleep 1
+        Fast::File.new.read "demo.txt"
+        ::File.atime("demo.txt").should > atime
+        ::File.unlink "demo.txt"
+      end
+      
+      it "should accept a symbol as an argument" do
+        ::File.should_not exist "demo_txt"
+        Fast::File.new.append "demo_txt", "New content!"
+        Fast::File.new.read :demo_txt
+        ::File.unlink "demo_txt"
+      end
+    end
+    
+    context "the file doesn't exist" do
+      it "should rise an exception" do
+        ::File.should_not exist "demo.txt"
+        expect { Fast::File.new.read "demo.txt"
+        }.to raise_error
+      end
+    end
+  end
 end

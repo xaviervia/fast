@@ -35,6 +35,12 @@ module Fast
       @path
     end
     
+    # Returns the contents of the file, all at once
+    def read path
+      @path = normalize path
+      ::File.read @path
+    end
+    
     def self.call *args
       if args.empty?
         File.new
