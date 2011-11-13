@@ -323,6 +323,16 @@ describe Fast::Dir do
     it_behaves_like "any dir absolutizer"
   end
   
+  describe "#path" do
+    context "the path is setted" do
+      it "should return the path"
+    end
+    
+    context "the path is undefined" do
+      it "should return nil"
+    end
+  end
+  
   describe "#rename" do
     it "should change the dir's name"
   end

@@ -5,7 +5,8 @@ module Fast
     # Initializes the file
     def initialize source = nil
       unless source.nil?
-        super( "#{source}" ) 
+        super( "#{source}" )
+        @path = normalize source 
       else
         super()
       end
@@ -25,7 +26,23 @@ module Fast
       ::File.open @path, "a" do |handler|
         handler.write content
       end
-      @path
+      self
+    end
+    
+    # Writes data into the file. If is does not exist, creates it
+    # if it already exists, overwrites it!
+    def write *args
+      if args.length > 1
+        path, content = *args
+        @path = normalize path
+      else
+        content = args.first
+      end
+      Fast.dir! ::File.dirname @path if ::File.dirname(@path) != "."
+      ::File.open @path, "w" do |handler|
+        handler.write content
+      end
+      self
     end
     
     # Deletes the file (wrapper for `File.unlink <path>`)
@@ -55,7 +72,7 @@ module Fast
     alias :create! :touch
     
     # Returns the contents of the file, all at once
-    def read path
+    def read path = nil
       @path = normalize path if path
       ::File.read @path
     end
@@ -83,6 +100,41 @@ module Fast
     
     alias :absolute :expand
         
+    # Renames the file (by Fast::File own means, it does not call 
+    # the underlying OS). Fails if the new path is an existent file
+    def rename *args
+      if args.length > 1
+        path, new_path = *args
+        @path = normalize path
+        new_path = normalize new_path
+      else
+        new_path = normalize args.first
+      end
+      raise ArgumentError, "The file '#{new_path}' already exists" if File.new.exists? new_path
+      renamed = File.new.write new_path, self.read
+      self.delete!
+      return renamed      
+    end
+
+    # Like #rename, but overwrites the new file if is exist
+    def rename! *args
+      if args.length > 1
+        path, new_path = *args
+        @path = normalize path
+        new_path = normalize new_path
+      else
+        new_path = normalize args.first
+      end
+      renamed = File.new.write new_path, self.read
+      self.delete!
+      return renamed      
+    end
+    
+    # Returns the path to the current file
+    def path
+      @path if @path
+    end
+    
     private
       def normalize path
         "#{path}"

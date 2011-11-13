@@ -22,6 +22,7 @@ Don't install right now, as 13-09-2011 this is pre-alpha, but in intensive devel
 == Quick notes
 * File lists as returned by Fast::Dir#list and Fast::Dir#dirs will be filtered after the list is retrieved by a set of filtering methods of the returned list, which should be an instance of Fast::Dir. 
 * An instance of Fast::Dir should be possible to be created from a Array.
+* The path can be setted indirectly by any method of Fast::File instances, and the same works for Dir. This is fine because allows for very quick calls, but once an instance gets a path setted it should be fixed and raise an exception in case some other method call is trying to change it. 
 
 == License
 

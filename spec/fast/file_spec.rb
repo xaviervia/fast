@@ -47,7 +47,11 @@ describe Fast::File do
       ::File.unlink "demo.txt"
     end
     
-    it "should return the file"
+    it "should return the file" do
+      the_file = ::Fast::File.new.append "demo.file", "Some content."
+      the_file.should be_a Fast::File
+      the_file.delete!
+    end
     
     it "should work even when a symbol is passed as argument" do
       Fast::File.new.append :demo_txt, "Hola."
@@ -66,14 +70,42 @@ describe Fast::File do
     end
   end
   
+  describe "#<<" do
+    it "should behave almost like #append"
+  end
+  
   describe "#write" do
-    it "should create the file if it does not exist"
+    it "should create the file if it does not exist" do
+      Fast::File.new.should_not exist "demo.file"
+      Fast::File.new.write "demo.file", "This is all."
+      Fast::File.new.should exist "demo.file"
+      Fast::File.new.destroy "demo.file"
+    end
     
-    it "should write the given content into the file"
+    it "should write the given content into the file" do
+      Fast::File.new.should_not exist "demo.file"
+      the_file = Fast::File.new "demo.file"
+      the_file.write "This is content!"
+      the_file.read.should == "This is content!"
+      the_file.destroy
+    end
     
-    it "should overwrite the file if it exists"
+    it "should overwrite the file if it exists" do
+      Fast::File.new.should_not exist "demo.file"
+      ::File.open "demo.file", "w" do |file|
+        file.write "Something..."
+      end
+      
+      Fast::File.new.write "demo.file", "Another something"
+      Fast::File.new.read( "demo.file" ).should == "Another something"
+      Fast::File.new.delete! "demo.file"
+    end
     
-    it "should return the file"
+    it "should return the file" do
+      the_file = Fast::File.new.write "demo.file", "More content this time."
+      the_file.should be_a Fast::File
+      the_file.delete!
+    end
   end
 
   shared_examples_for "any file deletion" do
@@ -255,7 +287,7 @@ describe Fast::File do
       end
       
       context "a block is passed" do
-        it "should be passed a read-only file as an argument, as in File.open"
+        it "should have direct access to file's methods"
       end
     end
     
@@ -351,8 +383,80 @@ describe Fast::File do
     before :each do @method = :absolute end
     it_behaves_like "any file absolutizer"
   end
-  
+ 
+  describe "#path" do 
+    context "the path is setted" do
+      it "returns the path" do
+        the_file = Fast::File.new "demo.file"
+        the_file.path.should == "demo.file"
+      end
+    end
+    
+    context "the path is undefined" do
+      it "returns nil" do
+        the_file = Fast::File.new
+        the_file.path.should be_nil
+      end
+    end
+  end
+
+  shared_examples_for "any file renaming" do
+    it "should change the file's name" do
+      Fast::File.new.should_not exist "demo.file"
+      Fast::File.new.should_not exist "renamed.file"
+      Fast::File.new.write "demo.file", "This content is the proof."
+      Fast::File.new.send @method, "demo.file", "renamed.file"
+      
+      Fast::File.new.should_not exist "demo.file"
+      Fast::File.new.should exist "renamed.file"
+      Fast::File.new.read( "renamed.file" ).should == "This content is the proof."
+      Fast::File.new.delete! "renamed.file"
+    end
+
+    it "should return the file with the new path" do
+      Fast::File.new.should_not exist "demo.file"
+      Fast::File.new.should_not exist "renamed.file"
+      Fast::File.new.write "demo.file", "Some content"
+      the_renamed = Fast::File.new.send @method, "demo.file", "renamed.file"
+      the_renamed.path 
+      the_renamed.delete!
+    end
+  end
+
   describe "#rename" do
-    it "should change the file's name"
+    before :all do @method = :rename end
+    it_behaves_like "any file renaming"
+    
+    it "should fail if a file named as the new name exists" do
+      Fast::File.new.should_not exist "demo.file"
+      Fast::File.new.should_not exist "renamed.file"
+      Fast::File.new.touch "renamed.file"
+      Fast::File.new.write "demo.file", "Demo content bores me"
+      
+      expect { Fast::File.new.rename "demo.file", "renamed.file"
+      }.to raise_error ArgumentError, "The file 'renamed.file' already exists"
+      
+      Fast::File.new.delete! "demo.file"
+      Fast::File.new.delete! "renamed.file"
+    end
+  end
+  
+  describe "#rename!" do
+    before :all do @method = :rename! end
+    it_behaves_like "any file renaming"
+
+    it "should overwrite the new file if it exists" do
+      Fast::File.new.should_not exist "demo.file"
+      Fast::File.new.should_not exist "renamed.file"
+      Fast::File.new.touch "renamed.file"
+      Fast::File.new.write "demo.file", "Demo content bores me"
+      
+      Fast::File.new.rename! "demo.file", "renamed.file"
+      
+      Fast::File.new.should_not exist "demo.file"
+      Fast::File.new.read( "renamed.file" ).should == "Demo content bores me"
+      
+      Fast::File.new.delete! "renamed.file"
+    end
   end
 end
