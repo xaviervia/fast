@@ -23,6 +23,7 @@ module Fast
     alias :destroy :delete
     alias :unlink :delete
     alias :del :delete
+    alias :delete! :delete
     
     # Touches the file passed. Like bash `touch`, but creates
     # all required directories if they don't exist
@@ -34,6 +35,9 @@ module Fast
       end
       @path
     end
+    
+    alias :create :touch
+    alias :create! :touch
     
     # Returns the contents of the file, all at once
     def read path

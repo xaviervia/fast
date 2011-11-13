@@ -2,11 +2,30 @@ require "fast"
 require "pry"
 
 describe Fast::Dir do
-  shared_examples_for "any list" do 
-    it "should accept a block as an argument"
+  shared_examples_for "any dir list" do 
+    context "a block is passed as an argument" do
+      it "should pass each entry as argument to the block" do
+        ::File.should_not be_directory "demo"
+        Fast::File.new.touch "demo/myfile.txt"
+        Fast::File.new.touch "demo/otherfile.txt"
+        Fast::Dir.new.create "demo/subdir"
+        
+        iteration = []
+        list = Fast::Dir.new.send @method, "demo" do |entry|
+          iteration << entry
+        end 
+                
+        iteration.should == list
+        
+        Fast::Dir.new.delete! "demo"
+      end
+    end
   end
 
   describe "#list" do 
+    before :each do @method = :list end
+    it_behaves_like "any dir list"
+    
     it "should return a list of all items in the directory, excluding '.' & '..'" do
       ::File.should_not be_directory "demo"
       ::Dir.mkdir "demo"
@@ -28,11 +47,12 @@ describe Fast::Dir do
       ::File.unlink "demo/alice.txt"
       ::Dir.unlink "demo"
     end
-    
-    it_behaves_like "any list"
   end
   
   describe "#files" do
+    before :each do @method = :files end
+    it_behaves_like "any dir list"
+
     it "should return a list of all files in the directory" do
       ::File.should_not be_directory "demo"
       ::Dir.mkdir "demo"
@@ -54,11 +74,12 @@ describe Fast::Dir do
       ::File.unlink "demo/alice.txt"
       ::Dir.unlink "demo"
     end
-
-    it_behaves_like "any list"
   end
   
   describe "#dirs" do
+    before :each do @method = :dirs end
+    it_behaves_like "any dir list"
+
     it "should return a list containing all dirs in the directory, excludind dots" do
       ::File.should_not be_directory "demo"
       ::Dir.mkdir "demo"
@@ -83,16 +104,14 @@ describe Fast::Dir do
       ::File.unlink "demo/alice.txt"
       ::Dir.unlink "demo"
     end
-
-    it_behaves_like "any list"
   end
   
-  describe "#create" do
+  shared_examples_for "any dir creation" do
     context "is a simple path" do
       it "should create the dir" do
         ::File.should_not be_directory "demo"
         
-        Fast::Dir.new.create "demo"
+        Fast::Dir.new.send @method, "demo"
         ::File.should be_directory "demo"
         ::Dir.unlink "demo"
       end
@@ -108,7 +127,7 @@ describe Fast::Dir do
       it "should create the directory tree" do
         ::File.should_not be_directory "demo"
         
-        Fast::Dir.new.create "demo/subdir"
+        Fast::Dir.new.send @method, "demo/subdir"
         ::File.should be_directory "demo"
         ::File.should be_directory "demo/subdir"
 
@@ -116,18 +135,63 @@ describe Fast::Dir do
         ::Dir.unlink "demo"
       end
     end
-  end
+    
+    context "it is nested within several dirs" do
+      it "should create the directory tree" do
+        ::File.should_not be_directory "demo"
+        
+        Fast::Dir.new.send @method, "demo/in/several/subdirs"
+        ::File.should be_directory "demo/in/several/subdirs"
 
-  describe "#by" do 
-    it "should forward self to a filtering object"
-    # This is a reminder: along with Serializer, the Filtering pattern
+        ::Dir.unlink "demo/in/several/subdirs"
+        ::Dir.unlink "demo/in/several"
+        ::Dir.unlink "demo/in"
+        ::Dir.unlink "demo"
+      end
+    end
+  end
+  
+  describe "#create" do
+    before :each do @method = :create end
+    it_behaves_like "any dir creation"
+  end
+  
+  describe "#create!" do
+    before :each do @method = :create! end
+    it_behaves_like "any dir creation"
+  end
+  
+  shared_examples_for "any subsetter" do
+    # This is a reminder: along with Serializer, the Subsette pattern
     # (and later, the Sorting one) should be implemented Fast
     
     # I guess filtering in Fast will be done in Fast::FileFilter
+    it "should forward self to a filtering object" do
+      Fast::Dir.new.should_not exist "demo"
+      Fast::File.new.touch "demo/in/subdir.file"
+      
+      the_demo_dir = Fast::Dir.new :demo
+      
+      Fast::DirFilter.should_receive( :new ).with the_demo_dir
+      
+      the_demo_dir.by
+      
+      the_demo_dir.delete!
+    end   
+  end
+
+  describe "#by" do 
+    before :each do @method = :by end
+    it_behaves_like "any subsetter"
+  end
+  
+  describe "#filter" do
+    before :each do @method = :filter end
+    it_behaves_like "any subsetter"
   end
 
   
-  shared_examples_for "any deletion" do
+  shared_examples_for "any dir deletion" do
     it "should fail if the directory does not exist" do
       ::File.should_not be_directory "demo"
       expect { Fast::Dir.new.send @method, "demo"
@@ -158,36 +222,77 @@ describe Fast::Dir do
       end
     end
     
-    it "should return the deleted dir path"
+    it "should return the deleted dir path" do
+      ::File.should_not be_directory "demo"
+      Fast::Dir.new.create "demo"
+      Fast::Dir.new.send( @method, "demo" ).should == "demo"
+    end
   end
 
   describe "#delete" do
     before :each do @method = :delete end
-    it_behaves_like "any deletion" 
+    it_behaves_like "any dir deletion" 
+  end
+  
+  describe "#delete!" do
+    before :each do @method = :delete! end
+    it_behaves_like "any dir deletion"
   end
   
   describe "#del" do 
     before :each do @method = :del end
-    it_behaves_like "any deletion" 
+    it_behaves_like "any dir deletion" 
   end
   
   describe "#destroy" do 
     before :each do @method = :destroy end
-    it_behaves_like "any deletion" 
+    it_behaves_like "any dir deletion" 
   end
   
   describe "#unlink" do 
     before :each do @method = :unlink end
-    it_behaves_like "any deletion" 
+    it_behaves_like "any dir deletion" 
+  end
+  
+  shared_examples_for "any dir existencialism" do
+    it "should return true if the dir exists" do
+      ::File.should_not be_directory "demo"
+      Fast::Dir.new.create! "demo"
+      Fast::Dir.new.send( @method, "demo" ).should be_true
+      Fast::Dir.new.delete! "demo"
+    end
+    
+    it "should return false if the dir does not exist" do
+      ::File.should_not be_directory "demo"
+      Fast::Dir.new.send( @method, "demo" ).should be_false
+    end
   end
   
   describe "#exist?" do
-    it "should return true if the dir exists"
-    it "should return false if the dir does not exist"
+    before :each do @method = :exist? end
+    it_behaves_like "any dir existencialism"
+  end
+  
+  describe "#exists?" do
+    before :each do @method = :exists? end
+    it_behaves_like "any dir existencialism"
+  end
+  
+  describe ".new" do
+    it "should accept a string path as argument" do
+      Fast::Dir.new "demo"
+    end
+    
+    it "should accept a symbol path as argument" do
+      Fast::Dir.new :demo
+    end
   end
   
   describe "#to_s" do
-    it "should include the path to the dir"
+    it "should include the path to the dir" do
+      Fast::Dir.new.should_not exist "demo"
+      Fast::Dir.new(:demo).to_s.should include "demo"
+    end
   end
 
 end

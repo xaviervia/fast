@@ -70,7 +70,7 @@ describe Fast::File do
   end
   
 
-  shared_examples_for "any deletion" do
+  shared_examples_for "any file deletion" do
     it "should delete the file" do
       ::File.open "demo.txt", "w" do |file|
         file.write "Hola."
@@ -100,40 +100,43 @@ describe Fast::File do
   
   describe "#delete" do
     before :each do @method = :delete end
-    it_behaves_like "any deletion" 
+    it_behaves_like "any file deletion" 
+  end
+
+  describe "#delete!" do
+    before :each do @method = :delete! end
+    it_behaves_like "any file deletion" 
   end
   
   describe "#unlink" do
     before :each do @method = :unlink end
-    it_behaves_like "any deletion"
+    it_behaves_like "any file deletion"
   end
   
   describe "#del" do 
     before :each do @method = :del end
-    it_behaves_like "any deletion" 
+    it_behaves_like "any file deletion" 
   end
   
   describe "#destroy" do 
     before :each do @method = :destroy end
-    it_behaves_like "any deletion"
+    it_behaves_like "any file deletion"
   end
   
-  describe "#touch" do
+  shared_examples_for "any file creation" do
     context "in current folder" do
       it "should create the file if it does not exist" do
         ::File.should_not exist "demo.txt"
-        Fast::File.new.touch "demo.txt"
+        Fast::File.new.send @method, "demo.txt"
         ::File.should exist "demo.txt"
         ::File.unlink "demo.txt"
-      end
-      
+      end      
     end
-    
     context "the file is inside a directory" do
       it "should create the file if it does not exist" do
         ::Dir.mkdir "demo" unless ::File.directory? "demo"
         ::File.should_not exist "demo/demo.txt"
-        Fast::File.new.touch "demo/demo.txt"
+        Fast::File.new.send @method, "demo/demo.txt"
         ::File.should exist "demo/demo.txt"
         ::File.unlink "demo/demo.txt"
         ::Dir.unlink "demo"
@@ -143,7 +146,7 @@ describe Fast::File do
     context "the file is inside several non existing directories" do
       it "should create all the required directory tree" do
         ::File.should_not be_directory "demo"
-        Fast::File.new.touch "demo/in/several/subdirs/file.txt"
+        Fast::File.new.send @method, "demo/in/several/subdirs/file.txt"
         ::File.should exist "demo/in/several/subdirs/file.txt"
         ::File.unlink "demo/in/several/subdirs/file.txt"
         ::Dir.unlink "demo/in/several/subdirs"
@@ -156,7 +159,7 @@ describe Fast::File do
     context "the file is inside a non existing directory" do
       it "should create the directory aswell as the file" do
         ::File.should_not be_directory "demo"
-        Fast::File.new.touch "demo/demo.txt"
+        Fast::File.new.send @method, "demo/demo.txt"
         ::File.should exist "demo/demo.txt"
         ::File.unlink "demo/demo.txt"
         ::Dir.unlink "demo"
@@ -167,9 +170,41 @@ describe Fast::File do
       ::File.open "demo.txt", "w" do |file|
         file.write "something"
       end
-      Fast::File.new.touch "demo.txt"
+      Fast::File.new.send @method, "demo.txt"
       ::File.unlink "demo.txt"
     end
+    
+    it "should be empty if it did not exist" do
+      ::File.should_not exist "demo.txt"
+      Fast::File.new.send @method, "demo.txt"
+      ::File.read( "demo.txt" ).should == ""
+      ::File.unlink "demo.txt"
+    end
+    
+    it "should return the path to the file" do
+      Fast::File.new.send( @method, "demo.txt" ).should == "demo.txt"
+      ::File.unlink "demo.txt"
+    end
+    
+    it "should accept a symbol as an argument" do
+      Fast::File.new.send @method, :demo_txt
+      ::File.unlink "demo_txt"
+    end
+  end
+  
+  describe "#create" do
+    before :each do @method = :create end
+    it_behaves_like "any file creation"
+  end
+  
+  describe "#create!" do 
+    before :each do @method = :create! end
+    it_behaves_like "any file creation"
+  end
+  
+  describe "#touch" do
+    before :each do @method = :touch end
+    it_behaves_like "any file creation"
     
     it "should change its atime if already exists" do
       unless OS.windows?
@@ -184,23 +219,6 @@ describe Fast::File do
       else
         pending "This is for POSIX only."
       end
-    end
-
-    it "should be empty if it did not exist" do
-      ::File.should_not exist "demo.txt"
-      Fast::File.new.touch "demo.txt"
-      ::File.read( "demo.txt" ).should == ""
-      ::File.unlink "demo.txt"
-    end
-    
-    it "should return the path to the file" do
-      Fast::File.new.touch( "demo.txt" ).should == "demo.txt"
-      ::File.unlink "demo.txt"
-    end
-    
-    it "should accept a symbol as an argument" do
-      Fast::File.new.touch :demo_txt
-      ::File.unlink "demo_txt"
     end
   end  
   
@@ -242,5 +260,18 @@ describe Fast::File do
         }.to raise_error
       end
     end
+  end
+  
+  shared_examples_for "any file existencialism" do
+    it "should return true if file exists"
+    it "should return false if file does not exist"
+  end
+  
+  describe "#exist?" do
+    it_behaves_like "any file existencialism"
+  end
+  
+  describe "#exists?" do
+    it_behaves_like "any file existencialism"
   end
 end

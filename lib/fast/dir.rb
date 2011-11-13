@@ -2,32 +2,45 @@ module Fast
   # Directory handling class
   class Dir < Array
     # .call -> like Fast::File.call -> NOUP: make delegator pattern Singleton-like
+    def initialize path = nil
+      super()
+      @path = normalize path if path
+    end
     
     # Returns a Fast::Dir list with all items in the directory, except ".." and "."
-    def list path = nil
+    def list path = nil, &block
       @path = normalize path if path
       ::Dir.foreach @path do |entry|
-        self << entry unless entry == "." or entry == ".."
+        unless entry == "." or entry == ".."
+          self << entry 
+          block.call entry if block
+        end
       end
       self
     end
     
     # Returns a Fast::Dir list of all files in the directory. Non recursive 
     # (at least yet)
-    def files path = nil
+    def files path = nil, &block
       @path = normalize path if path
       ::Dir.foreach @path do |entry|
-        self << entry unless ::File.directory? "#{@path}/#{entry}"
+        unless ::File.directory? "#{@path}/#{entry}"
+          self << entry 
+          block.call entry if block
+        end
       end
       self
     end
     
     # Returns a Fast::Dir list of all directories in the directory, non-recursive
     # and excluding points
-    def dirs path = nil
+    def dirs path = nil, &block
       @path = normalize path if path
       ::Dir.foreach @path do |entry|
-        self << entry if ::File.directory? "#{@path}/#{entry}" and entry != "." and entry != ".."
+        if ::File.directory? "#{@path}/#{entry}" and entry != "." and entry != ".."
+          self << entry 
+          block.call entry if block
+        end
       end
       self
     end
@@ -46,10 +59,13 @@ module Fast
       end unless ::File.directory? @path
       self
     end
+    
+    alias :create! :create
   
+    # Deletes the directory along with all its content. Powerful, simple, risky!
     def delete path = nil
       @path = normalize path if path
-      Dir.new.list( @path ).each do |entry|
+      Dir.new.list @path do |entry|
         if ::File.directory? "#{@path}/#{entry}"
           Dir.new.delete "#{@path}/#{entry}" 
         else
@@ -60,15 +76,30 @@ module Fast
       @path
     end
   
+    alias :delete! :delete
     alias :destroy :delete
     alias :del :delete
     alias :unlink :delete
-    # #exist?
+    
+    # Checks for existence. True if the directory exists, false otherwise
+    def exist? path = nil
+      @path = normalize path if path
+      ::File.directory? @path
+    end
+    
+    alias :exists? :exist?
   
     # Returns a String brief of the dir
     def to_s
       return "#{@path}"
     end
+    
+    # Sends self to a DirFilter filter
+    def filter
+      DirFilter.new self
+    end
+    
+    alias :by :filter
     
     private
       def normalize path

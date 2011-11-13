@@ -2,6 +2,7 @@ require "metafun/delegator"
 
 require "fast/file"
 require "fast/dir"
+require "fast/dir-filter"
 
 module Fast
   # Returns the list of entries in the directory
