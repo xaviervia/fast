@@ -8,6 +8,17 @@ Library is pure Ruby 1.8.7, no FileUtils nor other dependencies (except Metafun 
 
 Don't install right now, as 13-09-2011 this is pre-alpha, but in intensive development.
 
+== Philosophy
+
+<tt>Fast</tt> embraces the more straightforward view of files as strings of data and directories as arrays of files/directories. Some arguments:
+
+* It is more realistic in everyday usage
+* It makes them more object-like (and thus, more friendly to OOP)
+* Is more semantic
+* Files as IOs are still accessible through the harder-to-use native Ruby API
+
+<tt>Fast::Dir</tt> is a subclass of <tt>Array</tt>, usable as a hash, and <tt>Fast::File</tt> if a subclass of String.
+
 == Quick notes
 * File lists as returned by Fast::Dir#list and Fast::Dir#dirs will be filtered after the list is retrieved by a set of filtering methods of the returned list, which should be an instance of Fast::Dir. 
 * An instance of Fast::Dir should be possible to be created from a Array.

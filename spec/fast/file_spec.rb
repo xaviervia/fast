@@ -47,10 +47,7 @@ describe Fast::File do
       ::File.unlink "demo.txt"
     end
     
-    it "should return the path to the file" do
-      Fast::File.new.append( "demo.txt", "Hola." ).should == "demo.txt"
-      ::File.unlink "demo.txt" 
-    end
+    it "should return the file"
     
     it "should work even when a symbol is passed as argument" do
       Fast::File.new.append :demo_txt, "Hola."
@@ -69,6 +66,15 @@ describe Fast::File do
     end
   end
   
+  describe "#write" do
+    it "should create the file if it does not exist"
+    
+    it "should write the given content into the file"
+    
+    it "should overwrite the file if it exists"
+    
+    it "should return the file"
+  end
 
   shared_examples_for "any file deletion" do
     it "should delete the file" do
@@ -263,15 +269,72 @@ describe Fast::File do
   end
   
   shared_examples_for "any file existencialism" do
-    it "should return true if file exists"
-    it "should return false if file does not exist"
+    it "should return true if file exists" do
+      ::File.should_not exist "demo.file"
+      Fast::File.new.create! "demo.file"
+      Fast::File.new.send( @method, "demo.file" ).should be_true
+      Fast::File.new.delete "demo.file"
+    end
+    
+    it "should return false if file does not exist" do
+      ::File.should_not exist "demo.file"
+      Fast::File.new.send( @method, "demo.file" ).should be_false
+    end
   end
   
   describe "#exist?" do
+    before :each do @method = :exist? end
     it_behaves_like "any file existencialism"
   end
   
   describe "#exists?" do
+    before :each do @method = :exists? end
     it_behaves_like "any file existencialism"
+  end
+  
+  shared_examples_for "any file subsetter" do
+    # This is a reminder: along with Serializer, the Subsetter pattern
+    # (and later, the Sorting one) should be implemented Fast
+    
+    # I guess filtering in Fast will be done in Fast::FileFilter
+    it "should forward self to a filtering object" do      
+      the_demo_file = Fast::File.new :demo
+      Fast::FileFilter.should_receive( :new ).with the_demo_file
+      the_demo_file.by
+    end   
+  end
+  
+  describe "#by" do 
+    before :each do @method = :by end
+    it_behaves_like "any file subsetter"
+  end
+  
+  describe "#filter" do
+    before :each do @method = :filter end
+    it_behaves_like "any file subsetter"
+  end
+
+  describe ".new" do
+    it "should accept a string path as argument" do
+      Fast::File.new "demo"
+    end
+    
+    it "should accept a symbol path as argument" do
+      Fast::File.new :demo
+    end
+  end  
+
+  describe "#expand" do
+    context "file path is a relative route" do
+      it "should expand the file path with pwd"
+    end
+    
+    context "file path is an absolute route" do
+      it "should return the same as given path"
+    end
+  end
+  
+  describe "#rename" do
+    it "should change the file's name"
   end
 end

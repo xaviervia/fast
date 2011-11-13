@@ -161,11 +161,11 @@ describe Fast::Dir do
     it_behaves_like "any dir creation"
   end
   
-  shared_examples_for "any subsetter" do
+  shared_examples_for "any dir subsetter" do
     # This is a reminder: along with Serializer, the Subsette pattern
     # (and later, the Sorting one) should be implemented Fast
     
-    # I guess filtering in Fast will be done in Fast::FileFilter
+    # I guess filtering in Fast will be done in Fast::DirFilter
     it "should forward self to a filtering object" do
       Fast::Dir.new.should_not exist "demo"
       Fast::File.new.touch "demo/in/subdir.file"
@@ -182,12 +182,12 @@ describe Fast::Dir do
 
   describe "#by" do 
     before :each do @method = :by end
-    it_behaves_like "any subsetter"
+    it_behaves_like "any dir subsetter"
   end
   
   describe "#filter" do
     before :each do @method = :filter end
-    it_behaves_like "any subsetter"
+    it_behaves_like "any dir subsetter"
   end
 
   
@@ -293,6 +293,38 @@ describe Fast::Dir do
       Fast::Dir.new.should_not exist "demo"
       Fast::Dir.new(:demo).to_s.should include "demo"
     end
+  end
+
+  describe "#expand" do
+    context "dir path is a relative route" do
+      it "should expand the dir path with the pwd"
+    end
+    
+    context "dir path is an absolute route" do
+      it "should return the same path as given"
+    end
+  end
+  
+  describe "#rename" do
+    it "should change the dir's name"
+  end
+
+  describe "#[]" do
+    context "a file named like the argument exists" do
+      it "should return it"
+    end
+    
+    context "a dir named like the argument exists" do
+      it "should return it"
+    end
+    
+    context "there's nothing there" do
+      it "should return nil"
+    end
+  end
+  
+  describe "#[]=" do # This is an absolute WIN
+    it "should create the file with the given content"
   end
 
 end
