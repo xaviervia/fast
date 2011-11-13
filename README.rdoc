@@ -1,0 +1,5 @@
+= Fast
+
+== Quick notes
+* File lists as returned by Fast::Dir#list and Fast::Dir#dirs will be filtered after the list is retrieved by a set of filtering methods of the returned list, which should be an instance of Fast::Dir. 
+* An instance of Fast::Dir should be possible to be created from a Array.
