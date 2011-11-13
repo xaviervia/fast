@@ -1,5 +1,19 @@
 = Fast
 
+DSL for file handling focused in intuitivity and semantics. 
+
+Library is pure Ruby 1.8.7, no FileUtils nor other dependencies (except Metafun for DSL delegation)
+
+== Installation
+
+Don't install right now, as 13-09-2011 this is pre-alpha, but in intensive development.
+
 == Quick notes
 * File lists as returned by Fast::Dir#list and Fast::Dir#dirs will be filtered after the list is retrieved by a set of filtering methods of the returned list, which should be an instance of Fast::Dir. 
 * An instance of Fast::Dir should be possible to be created from a Array.
+
+== License
+
+GPL License. Why else?
+
+@ Xavier Via

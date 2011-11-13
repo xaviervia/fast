@@ -32,9 +32,43 @@ module Fast
       self
     end
 
-    # #create
+    # Creates the dir, if it doesn't exist. Otherwise remains silent
+    def create path = nil
+      @path = normalize path if path
+      route = []
+      @path.split("/").each do |part|
+        unless part.empty?
+          route << part
+          unless ::File.directory? route.join "/"
+            ::Dir.mkdir route.join "/" 
+          end
+        end
+      end unless ::File.directory? @path
+      self
+    end
   
+    def delete path = nil
+      @path = normalize path if path
+      Dir.new.list( @path ).each do |entry|
+        if ::File.directory? "#{@path}/#{entry}"
+          Dir.new.delete "#{@path}/#{entry}" 
+        else
+          ::File.unlink "#{@path}/#{entry}" 
+        end
+      end
+      ::Dir.unlink @path
+      @path
+    end
+  
+    alias :destroy :delete
+    alias :del :delete
+    alias :unlink :delete
     # #exist?
+  
+    # Returns a String brief of the dir
+    def to_s
+      return "#{@path}"
+    end
     
     private
       def normalize path

@@ -76,7 +76,7 @@ describe Fast::File do
         file.write "Hola."
       end
       
-      Fast::File.new.delete "demo.txt"
+      Fast::File.new.send @method, "demo.txt"
       ::File.should_not exist "demo.txt"
     end
     
@@ -85,7 +85,7 @@ describe Fast::File do
         file.write "Hola."
       end
       
-      Fast::File.new.delete( "demo.txt" ).should == "demo.txt"
+      Fast::File.new.send( @method, "demo.txt" ).should == "demo.txt"
     end
     
     it "should be possible to use a symbol" do
@@ -93,15 +93,30 @@ describe Fast::File do
         file.write "Hola."
       end
       
-      Fast::File.new.delete :demo_txt
+      Fast::File.new.send @method, :demo_txt
       ::File.should_not exist "demo.txt"
     end
   end
   
-  describe "#delete" do it_behaves_like "any deletion" end
-  describe "#unlink" do it_behaves_like "any deletion" end
-  describe "#del" do it_behaves_like "any deletion" end
-  describe "#destroy" do it_behaves_like "any deletion" end
+  describe "#delete" do
+    before :each do @method = :delete end
+    it_behaves_like "any deletion" 
+  end
+  
+  describe "#unlink" do
+    before :each do @method = :unlink end
+    it_behaves_like "any deletion"
+  end
+  
+  describe "#del" do 
+    before :each do @method = :del end
+    it_behaves_like "any deletion" 
+  end
+  
+  describe "#destroy" do 
+    before :each do @method = :destroy end
+    it_behaves_like "any deletion"
+  end
   
   describe "#touch" do
     context "in current folder" do
@@ -123,6 +138,19 @@ describe Fast::File do
         ::File.unlink "demo/demo.txt"
         ::Dir.unlink "demo"
       end
+    end
+    
+    context "the file is inside several non existing directories" do
+      it "should create all the required directory tree" do
+        ::File.should_not be_directory "demo"
+        Fast::File.new.touch "demo/in/several/subdirs/file.txt"
+        ::File.should exist "demo/in/several/subdirs/file.txt"
+        ::File.unlink "demo/in/several/subdirs/file.txt"
+        ::Dir.unlink "demo/in/several/subdirs"
+        ::Dir.unlink "demo/in/several"
+        ::Dir.unlink "demo/in"
+        ::Dir.unlink "demo"
+      end   
     end
     
     context "the file is inside a non existing directory" do
@@ -200,6 +228,10 @@ describe Fast::File do
         Fast::File.new.append "demo_txt", "New content!"
         Fast::File.new.read :demo_txt
         ::File.unlink "demo_txt"
+      end
+      
+      context "a block is passed" do
+        it "should be passed a read-only file as an argument, as in File.open"
       end
     end
     

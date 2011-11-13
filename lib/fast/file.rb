@@ -28,7 +28,7 @@ module Fast
     # all required directories if they don't exist
     def touch path
       @path = normalize path
-      Fast.dir! ::File.dirname @path if ::File.dirname(@path) != "."
+      Fast::Dir.new.create ::File.dirname @path if ::File.dirname(@path) != "."
       ::File.open @path, "a+" do |file|
         file.gets; file.write ""
       end
