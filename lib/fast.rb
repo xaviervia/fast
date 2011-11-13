@@ -13,10 +13,11 @@ module Fast
   #     `:strip_extension => true`     # If an `:extension` is given, returns the
   #                                    # entries without it
   def self.dir path, options = nil
+    current = Dir.new path
     if options
       if options[:extension]
         filtered = []
-        ::Dir.entries(path).each do |entry|
+        current.list path do |entry|
           if entry.end_with? ".#{options[:extension]}"
             if options[:strip_extension]
               filtered << entry[0..-("#{options[:extension]}".length)-2]
@@ -28,20 +29,25 @@ module Fast
         return filtered
       end
     else
-      ::Dir.entries path
+      current.list path
     end
   end
   
   # Like `dir`, but creates the directory if it does not exist
   def self.dir! path, options = nil
-    mkdir path unless dir? path
+    Dir.new.create! path unless dir? path
     dir path, options
   end
   
   # Returns true if a directory named `path` exists, false otherwise.
   # (wrapper for `File.directory? <path>`)
   def self.dir? path  
-    ::File.directory? path
+    Dir.new.exist? path
+  end
+  
+  # Example. This all will be deprecated when features are done
+  def self.file? path
+    File.new.exist? path
   end
   
   # Returns an instance of Fast::File and passed all methods 
@@ -49,17 +55,8 @@ module Fast
   def self.file *args
     Fast::File.call *args
   end
-  
-  private
-    def self.mkdir path
-      path.split("/").each do |part|
-        route ||= part
-        ::Dir.mkdir route unless route == "" || ::File.directory?( route )
-        route += "/#{path}"
-      end
-    end
 end
 
 include Metafun::Delegator
 
-delegate Fast, :dir, :dir?, :dir!, :file, :from
+delegate Fast, :dir, :dir?, :dir!, :file, :file?

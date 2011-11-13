@@ -74,6 +74,14 @@ module Fast
     end
     
     alias :by :filter
+    
+    # Expands the path if it's a relative path
+    def expand path = nil
+      @path = normalize path if path
+      ::File.expand_path @path
+    end
+    
+    alias :absolute :expand
         
     private
       def normalize path

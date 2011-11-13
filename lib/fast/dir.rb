@@ -100,7 +100,15 @@ module Fast
     end
     
     alias :by :filter
+
+    # Expands the path to absolute is it is relative
+    def expand path = nil
+      @path = normalize path if path
+      ::File.expand_path @path
+    end
     
+    alias :absolute :expand
+        
     private
       def normalize path
         @path = "#{path}"
