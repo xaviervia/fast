@@ -50,6 +50,10 @@ module Fast
     File.new.exist? path
   end
   
+  def self.file! path
+    File.new.touch path
+  end
+  
   # Returns an instance of Fast::File and passed all methods 
   # and arguments to it
   def self.file *args
@@ -59,4 +63,4 @@ end
 
 include Metafun::Delegator
 
-delegate Fast, :dir, :dir?, :dir!, :file, :file?
+delegate Fast, :dir, :dir?, :dir!, :file, :file?, :file!
