@@ -228,6 +228,8 @@ describe Fast::File do
       Fast::File.new.send @method, :demo_txt
       ::File.unlink "demo_txt"
     end
+    
+    it "should work with multiple arguments"
   end
   
   describe "#create" do
@@ -312,6 +314,8 @@ describe Fast::File do
       ::File.should_not exist "demo.file"
       Fast::File.new.send( @method, "demo.file" ).should be_false
     end
+    
+    it "should work with multiple arguments"
   end
   
   describe "#exist?" do

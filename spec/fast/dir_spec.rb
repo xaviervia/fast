@@ -149,6 +149,22 @@ describe Fast::Dir do
         ::Dir.unlink "demo"
       end
     end
+    
+    it "should work with several arguments" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.should_not exist :alt
+      Fast::Dir.new.should_not exist :other
+      
+      Fast::Dir.new.send @method, :demo, :alt, :other
+      
+      Fast::Dir.new.should exist :demo
+      Fast::Dir.new.should exist :alt
+      Fast::Dir.new.should exist :other
+      
+      Fast::Dir.new.delete! :demo
+      Fast::Dir.new.delete! :alt
+      Fast::Dir.new.delete! :other
+    end
   end
   
   describe "#create" do
@@ -191,13 +207,7 @@ describe Fast::Dir do
   end
 
   
-  shared_examples_for "any dir deletion" do
-    it "should fail if the directory does not exist" do
-      ::File.should_not be_directory "demo"
-      expect { Fast::Dir.new.send @method, "demo"
-      }.to raise_error
-    end
-    
+  shared_examples_for "any dir deletion" do    
     it "should delete the directory if it exists" do
       ::File.should_not be_directory "demo"
       Fast::Dir.new.create "demo"
@@ -227,31 +237,71 @@ describe Fast::Dir do
       Fast::Dir.new.create "demo"
       Fast::Dir.new.send( @method, "demo" ).should == "demo"
     end
+    
+    it "should work with several arguments" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.should_not exist :alt
+      Fast::Dir.new.should_not exist :other
+      
+      Fast::Dir.new.create! :demo, :alt, :other
+      Fast::Dir.new.send @method, :demo, :alt, :other
+
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.should_not exist :alt
+      Fast::Dir.new.should_not exist :other
+    end
   end
 
   describe "#delete" do
     before :each do @method = :delete end
     it_behaves_like "any dir deletion" 
+
+    it "should fail if the directory does not exist" do
+      ::File.should_not be_directory "demo"
+      expect { Fast::Dir.new.send @method, "demo"
+      }.to raise_error
+    end
   end
   
   describe "#delete!" do
     before :each do @method = :delete! end
     it_behaves_like "any dir deletion"
+    
+    it "should not fail even if the directory does not exist" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.delete! :demo
+    end
   end
   
   describe "#del" do 
     before :each do @method = :del end
     it_behaves_like "any dir deletion" 
+    it "should fail if the directory does not exist" do
+      ::File.should_not be_directory "demo"
+      expect { Fast::Dir.new.send @method, "demo"
+      }.to raise_error
+    end
   end
   
   describe "#destroy" do 
     before :each do @method = :destroy end
     it_behaves_like "any dir deletion" 
+    it "should fail if the directory does not exist" do
+      ::File.should_not be_directory "demo"
+      expect { Fast::Dir.new.send @method, "demo"
+      }.to raise_error
+    end
   end
   
   describe "#unlink" do 
     before :each do @method = :unlink end
     it_behaves_like "any dir deletion" 
+
+    it "should fail if the directory does not exist" do
+      ::File.should_not be_directory "demo"
+      expect { Fast::Dir.new.send @method, "demo"
+      }.to raise_error
+    end
   end
   
   shared_examples_for "any dir existencialism" do
@@ -341,38 +391,99 @@ describe Fast::Dir do
   
   shared_examples_for "any dir renaming" do
     it "should delete current dir and target dir should exist" do
-      pending "I have to give this a longer thought" do
       Fast::Dir.new.should_not exist "demo"
       Fast::Dir.new.should_not exist "renamed"
-#      Fast::Dir.new.create! "demo"
-#      Fast::Dir.new.rename "demo", "renamed"
-#      Fast::Dir.new.should_not exist "demo"
-#      Fast::Dir.new.should exist "renamed"
-#      Fast::Dir.new.delete! "renamed"
-      end
+      Fast::Dir.new.create! "demo"
+      Fast::Dir.new.send @method, "demo", "renamed"
+      Fast::Dir.new.should_not exist "demo"
+      Fast::Dir.new.should exist "renamed"
+      Fast::Dir.new.delete! "renamed"
     end
     
-    it "should return a dir with the new dirs name"
+    it "should return a dir with the new dirs name" do
+      Fast::Dir.new.should_not exist "demo"
+      Fast::Dir.new.should_not exist "renamed"
+      Fast::Dir.new.create! "demo"
+      Fast::Dir.new.send( @method, "demo", "renamed" ).path.should == "renamed"
+      Fast::Dir.new.delete! "renamed"
+    end
+    
+    it "should contain the same data the target as the source" do
+      Fast::Dir.new.should_not exist "demo"
+      Fast::Dir.new.should_not exist "renamed"
+      Fast::File.new.touch "demo/content.file"
+      Fast::File.new.touch "demo/in/subdir/more.content"
+      Fast::File.new.touch "demo/hope.txt"
+      
+      Fast::Dir.new.send @method, "demo", :renamed # Yeah, symbols work too
+      Fast::Dir.new.should_not exist :demo
+      Fast::File.new.should exist "renamed/content.file"
+      Fast::File.new.should exist "renamed/hope.txt"
+      Fast::File.new.should exist "renamed/in/subdir/more.content"
+      
+      Fast::Dir.new.delete! :renamed
+    end
   end
 
   describe "#rename" do
+    before :all do @method = :rename end
     it_behaves_like "any dir renaming"    
     
-    it "should fail if the new path represents an existing dir"
+    it "should fail if the new path represents an existing dir" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.should_not exist :renamed
+      Fast::Dir.new.create! :demo
+      Fast::Dir.new.create! :renamed
+      expect { Fast::Dir.new.rename :demo, :renamed
+      }.to raise_error ArgumentError, "The target directory 'renamed' already exists"
+      Fast::Dir.new.delete! :demo
+      Fast::Dir.new.delete! :renamed
+    end
   end
   
   describe "#rename!" do
+    before :all do @method = :rename! end
     it_behaves_like "any dir renaming"
     
-    it "should overwrite the dir @ the new path if it exists"
+    it "should overwrite the dir at the new path if it exists" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.should_not exist :renamed
+      Fast::File.new.touch "demo/content.file"
+      Fast::File.new.touch "renamed/erase.me"
+      
+      Fast::Dir.new.rename! :demo, :renamed
+      Fast::File.new.should_not exist "renamed/erase.me"
+      Fast::File.new.should exist "renamed/content.file"
+      Fast::Dir.new.delete! :renamed
+    end
   end
   
   describe "#merge" do
-    it "should delete target dir"
+    before :each do 
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.should_not exist :mergeme
+    end
     
-    it "should fail if target dir does not exist"
+    it "should delete target dir" do
+      Fast::File.new.touch "demo/content.file"
+      Fast::File.new.touch "mergeme/mergeable.file"
+      
+      Fast::Dir.new.merge :demo, :mergeme
+      Fast::Dir.new.should_not exist :mergeme
+    end
     
-    it "should put contents of target dir into current dir"
+    it "should fail if target dir does not exist" do
+      Fast::Dir.new.create! :demo
+      expect { Fast::Dir.new.merge :demo, :mergeme
+      }.to raise_error Errno::ENOENT
+    end
+    
+    it "should put contents of target dir into current dir, recursively"
+    
+    after :each do 
+      Fast::Dir.new.delete! :demo    if Fast::Dir.new.exist? :demo
+      Fast::Dir.new.delete! :mergeme if Fast::Dir.new.exist? :mergeme
+    end
   end
 
   describe "#[]" do
