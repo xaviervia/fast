@@ -315,7 +315,7 @@ describe Fast::File do
       Fast::File.new.send( @method, "demo.file" ).should be_false
     end
     
-    it "should work with multiple arguments"
+    it "should return false if path represents a directory!"
   end
   
   describe "#exist?" do
@@ -326,6 +326,24 @@ describe Fast::File do
   describe "#exists?" do
     before :each do @method = :exists? end
     it_behaves_like "any file existencialism"
+  end
+  
+  describe "#exist_all?" do
+    before :each do @method = :exist_all? end
+    it_behaves_like "any file existencialism"
+    
+    it "should return true if all exist"
+    
+    it "should return false if any does not exist"
+  end
+  
+  describe "#exist_any?" do
+    before :each do @method = :exist_any? end
+    it_behaves_like "any file existencialism"
+    
+    it "should return true if at least one exists"
+    
+    it "should return false if none exist"
   end
   
   shared_examples_for "any file subsetter" do

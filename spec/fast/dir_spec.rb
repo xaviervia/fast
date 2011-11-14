@@ -458,6 +458,30 @@ describe Fast::Dir do
     end
   end
   
+  shared_examples_for "any dir copy" do
+    context "target dir do not exist" do
+      it "should create the target dir"
+      
+      it "should not erase current dir"
+    end
+    
+    it "should be present all of source data in the target"
+    
+    it "should return current dir"
+  end
+  
+  describe "#copy" do
+    it_behaves_like "any dir copy"
+    
+    it "should fail if any conflict appears"
+  end
+  
+  describe "#copy!" do
+    it_behaves_like "any dir copy"
+    
+    it "should overwrite in every conflict"
+  end
+  
   describe "#merge" do
     before :each do 
       Fast::Dir.new.should_not exist :demo
@@ -478,14 +502,51 @@ describe Fast::Dir do
       }.to raise_error Errno::ENOENT
     end
     
-    it "should put contents of target dir into current dir, recursively"
+    it "should put contents of target dir into current dir, recursively" do
+      Fast::File.new.touch "demo/content.file"
+      Fast::File.new.touch "demo/more.file"
+      Fast::File.new.touch "mergeme/data/info.file"
+      Fast::File.new.touch "mergeme/info.rb"
+      Fast::File.new.touch "mergeme/data/nested/is.informative.file"
+      
+      Fast::Dir.new.merge :demo, :mergeme
+      Fast::Dir.new.should_not exist :mergeme
+      
+      Fast::File.new.should exist "demo/content.file"
+      Fast::File.new.should exist "demo/more.file"
+      Fast::File.new.should exist "demo/data/info.file"
+      Fast::File.new.should exist "demo/info.rb"
+      Fast::File.new.should exist "demo/data/nested/is.informative.file"
+    end
+    
+    context "two fails in the source and target have the same name" do
+      it "should fail"
+      
+      it "should not do any changes in any dir"
+    end
     
     after :each do 
       Fast::Dir.new.delete! :demo    if Fast::Dir.new.exist? :demo
       Fast::Dir.new.delete! :mergeme if Fast::Dir.new.exist? :mergeme
     end
   end
+  
+  describe "#merge!" do
+    it "should behave like #merge but never fail"
+  end
 
+  describe "#mergeable?" do
+    context "both dirs exist and no file or dir in any has the same name in the other" do
+      it "should return true"
+    end
+    
+    context "some files in target dir have the same name as other in source" do
+      it "should return false"
+    end
+    
+    it "should fail it the target dir does not exist"
+  end
+  
   describe "#[]" do
     context "a file named like the argument exists" do
       it "should return it"

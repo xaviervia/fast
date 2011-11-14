@@ -171,6 +171,15 @@ module Fast
       else
         target = normalize args.first
       end
+      
+      Dir.new.list target do |entry|
+        unless Dir.new.exist? "#{target}/#{entry}"
+          File.new.rename "#{target}/#{entry}", "#{@path}/#{entry}"
+        else
+          Dir.new.rename "#{target}/#{entry}", "#{@path}/#{entry}"
+        end
+      end
+      
       Dir.new.delete target
     end
     

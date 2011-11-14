@@ -84,6 +84,8 @@ module Fast
     end
     
     alias :exists? :exist?
+    alias :exist_all? :exist?
+    alias :exist_any? :exist?
     
     # Sends self to a FileFilter filter
     def filter
