@@ -20,9 +20,16 @@ Don't install right now, as 13-09-2011 this is pre-alpha, but in intensive devel
 <tt>Fast::Dir</tt> is a subclass of <tt>Array</tt>, usable as a hash, and <tt>Fast::File</tt> if a subclass of String.
 
 == Quick notes
+* Move all Fast code to fast/main.rb. Update Metafun/Delegator so it will inject the #delegate method into every Object instance. Reduce the "fast.rb" to a call to external libraries, fast/main and DSLization via #delegate.
+* Describe the SubSetter pattern for filtering. 
 * File lists as returned by Fast::Dir#list and Fast::Dir#dirs will be filtered after the list is retrieved by a set of filtering methods of the returned list, which should be an instance of Fast::Dir. 
 * An instance of Fast::Dir should be possible to be created from a Array.
-* The path can be setted indirectly by any method of Fast::File instances, and the same works for Dir. This is fine because allows for very quick calls, but once an instance gets a path setted it should be fixed and raise an exception in case some other method call is trying to change it. 
+* The path can be setted indirectly by any method of Fast::File instances, and the same works for Dir. This is fine because allows for very quick calls, but once an instance gets a path setted it should be fixed and raise an exception in case some other method call is trying to change it.
+
+== Remote future
+* Make Fast a REST client (well, use <tt>rest-client</tt>) in order to transparently use files and directories from a compliant REST server. 
+* Include REST methods: Dir#post, File#get, File#head, etc
+* Allow Files to behave as Dirs with the right method calls
 
 == License
 

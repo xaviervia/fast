@@ -325,16 +325,54 @@ describe Fast::Dir do
   
   describe "#path" do
     context "the path is setted" do
-      it "should return the path"
+      it "should return the path" do
+        the_dir = Fast::Dir.new "demo"
+        the_dir.path.should == "demo"
+      end
     end
     
     context "the path is undefined" do
-      it "should return nil"
+      it "should return nil" do
+        the_dir = Fast::Dir.new 
+        the_dir.path.should be_nil
+      end
     end
   end
   
+  shared_examples_for "any dir renaming" do
+    it "should delete current dir and target dir should exist" do
+      pending "I have to give this a longer thought" do
+      Fast::Dir.new.should_not exist "demo"
+      Fast::Dir.new.should_not exist "renamed"
+#      Fast::Dir.new.create! "demo"
+#      Fast::Dir.new.rename "demo", "renamed"
+#      Fast::Dir.new.should_not exist "demo"
+#      Fast::Dir.new.should exist "renamed"
+#      Fast::Dir.new.delete! "renamed"
+      end
+    end
+    
+    it "should return a dir with the new dirs name"
+  end
+
   describe "#rename" do
-    it "should change the dir's name"
+    it_behaves_like "any dir renaming"    
+    
+    it "should fail if the new path represents an existing dir"
+  end
+  
+  describe "#rename!" do
+    it_behaves_like "any dir renaming"
+    
+    it "should overwrite the dir @ the new path if it exists"
+  end
+  
+  describe "#merge" do
+    it "should delete target dir"
+    
+    it "should fail if target dir does not exist"
+    
+    it "should put contents of target dir into current dir"
   end
 
   describe "#[]" do

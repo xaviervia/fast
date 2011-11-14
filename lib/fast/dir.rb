@@ -109,6 +109,27 @@ module Fast
     
     alias :absolute :expand
         
+    # Returns the path to the dir, if defined
+    def path
+      @path if @path
+    end    
+    
+    # Renames this dir into the target path, unless the target path 
+    # points to an existing dir.
+    def rename *args
+      if args.length > 1
+        current, target = *args
+        @path = normalize current
+        target = normalize target
+      else
+        target = normalize args.first
+      end
+      # 1. Create the target dir
+      # 2. Move all files
+      # 3. Rename recursively all dirs
+      # 4. Delete current dir
+   end
+    
     private
       def normalize path
         @path = "#{path}"

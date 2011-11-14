@@ -412,15 +412,6 @@ describe Fast::File do
       Fast::File.new.read( "renamed.file" ).should == "This content is the proof."
       Fast::File.new.delete! "renamed.file"
     end
-
-    it "should return the file with the new path" do
-      Fast::File.new.should_not exist "demo.file"
-      Fast::File.new.should_not exist "renamed.file"
-      Fast::File.new.write "demo.file", "Some content"
-      the_renamed = Fast::File.new.send @method, "demo.file", "renamed.file"
-      the_renamed.path 
-      the_renamed.delete!
-    end
   end
 
   describe "#rename" do
@@ -458,5 +449,11 @@ describe Fast::File do
       
       Fast::File.new.delete! "renamed.file"
     end
+  end
+  
+  describe "#merge" do
+    it "should delete the target file"
+    
+    it "should append the contents of the target into this"
   end
 end
