@@ -21,5 +21,13 @@ module Fast
       end
       return_me
     end
+    
+    def match regexp
+      return_me = Dir.new
+      @set.each do |entry|
+        return_me << entry if entry.match regexp
+      end
+      return_me
+    end
   end
 end

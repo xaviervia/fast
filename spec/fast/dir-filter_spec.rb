@@ -37,7 +37,16 @@ describe Fast::DirFilter do
   # finishing Fast and after that I'll dig deeper into SubSetting 
   describe "#match" do
     context "when given a list of strings and a regexp" do
-      it "should return a list containing the strings that match the expression"
+      it "should return a Dir containing the strings that match the expression" do
+        list = %w{is_a_file think_of_me not_my_file filesystem see_file_you}
+        final_list = Fast::DirFilter.new( list ).match /file/
+        final_list.should be_a Fast::Dir
+        final_list.should include "is_a_file"
+        final_list.should include "not_my_file"
+        final_list.should include "filesystem"
+        final_list.should include "see_file_you"
+        final_list.should_not include "think_of_me"
+      end
     end
   end
 end
