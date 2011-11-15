@@ -107,6 +107,11 @@ describe Fast::Dir do
   end
   
   shared_examples_for "any dir creation" do
+    it "should fail if no argument is passed" do
+      expect { Fast::Dir.new.send @method 
+      }.to raise_error ArgumentError, "No arguments passed, at least one is required"
+    end
+    
     context "is a simple path" do
       it "should create the dir" do
         ::File.should_not be_directory "demo"
@@ -170,11 +175,15 @@ describe Fast::Dir do
   describe "#create" do
     before :each do @method = :create end
     it_behaves_like "any dir creation"
+    
+    it "should fail if the dir already exists"
   end
   
   describe "#create!" do
     before :each do @method = :create! end
     it_behaves_like "any dir creation"
+    
+    it "should do nothing if the dir already exists"
   end
   
   shared_examples_for "any dir subsetter" do

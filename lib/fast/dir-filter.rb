@@ -7,9 +7,17 @@ module Fast
     end
 
     def extension the_extension
-      return_me = []
+      return_me = Dir.new
       @set.each do |entry|
         return_me << entry if entry.end_with? the_extension
+      end
+      return_me
+    end
+    
+    def strip_extension
+      return_me = Dir.new
+      @set.each do |entry|
+        return_me.push entry.gsub /\.(\w+?)$/, ""
       end
       return_me
     end

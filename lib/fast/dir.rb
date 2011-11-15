@@ -48,6 +48,7 @@ module Fast
     # Creates the dir, if it doesn't exist. Otherwise remains silent
     # Returns the last dir path passed as argument
     def create *args
+      raise ArgumentError, "No arguments passed, at least one is required" if args.empty?
       if args.length > 0
         return_me = nil
         args.each do |path|

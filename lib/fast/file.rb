@@ -22,7 +22,7 @@ module Fast
       else
         content = args.first
       end
-      Fast.dir! ::File.dirname @path if ::File.dirname(@path) != "."
+      Fast::Dir.new.create! ::File.dirname @path if ::File.dirname(@path) != "."
       ::File.open @path, "a" do |handler|
         handler.write content
       end
@@ -38,7 +38,7 @@ module Fast
       else
         content = args.first
       end
-      Fast.dir! ::File.dirname @path if ::File.dirname(@path) != "."
+      Fast::Dir.new.create! ::File.dirname @path if ::File.dirname(@path) != "."
       ::File.open @path, "w" do |handler|
         handler.write content
       end
