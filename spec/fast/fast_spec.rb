@@ -6,20 +6,13 @@ describe Fast do
       Fast.dir.should be_a Fast::Dir
     end
     
-    context "a path to an existing dir is passed" do
-      before do
-        Fast.dir.should_not exist :demo
-        Fast.dir.create! :demo
-        Fast::File.new.touch "demo/my.file"
-        Fast::File.new.touch "demo/other.file"
-      end
-      
+    context "a path to a dir is passed" do      
       it "should call #list on that instance" do
-        pending "Don't remember how to stub for instances"
-      end
-      
-      after do
-        Fast.dir.delete! :demo
+        module Fast
+          Dir.any_instance.should_receive :list
+        end
+        
+        Fast.dir :demo
       end
     end
   end
@@ -30,14 +23,28 @@ describe Fast do
       }.to raise_error ArgumentError
     end
     
-    it "should call #list on that instance"
-    
-    it "should call #create on that instance"
+    it "should call #create on that instance" do # So hakzee this one...
+      module Fast
+        Dir.any_instance.should_receive( :create ).and_return Dir.new( :demo )
+      end
+      
+      Fast.dir.create! :demo
+      Fast.dir! :demo
+      Fast.dir.delete! :demo
+    end
+
+    it "should call #list on that instance" do
+      module Fast
+        Dir.any_instance.should_receive( :list ).and_return Dir.new
+      end
+      
+      Fast.dir! :demo
+    end    
   end
   
   describe ".dir?" do
     before do
-      Fast.dir.should_not exist :demo
+      Fast.dir.delete! :demo
     end
     
     it "should return true if passed dir exists" do
@@ -56,7 +63,17 @@ describe Fast do
       Fast.file.should be_a Fast::File
     end
     
-    it "should call #read on that instance"
+    context "called with argument" do
+      it "should call #read on that instance" do
+        Fast.file.touch "demo.file"
+        module Fast
+          File.any_instance.should_receive :read 
+        end
+        
+        Fast.file "demo.file"
+        Fast.file.delete! "demo.file"
+      end
+    end
   end
   
   describe ".file!" do
@@ -65,7 +82,13 @@ describe Fast do
       }.to raise_error ArgumentError
     end
     
-    it "should call #create on that instance"
+    it "should call #create on that instance" do
+      module Fast
+        File.any_instance.should_receive :create
+      end
+      
+      Fast.file! "demo.file" 
+    end
   end
   
   describe ".file?" do
