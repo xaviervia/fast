@@ -20,7 +20,7 @@ Don't install right now, as 13-09-2011 this is pre-alpha, but in intensive devel
 <tt>Fast::Dir</tt> is a subclass of <tt>Array</tt>, usable as a hash, and <tt>Fast::File</tt> if a subclass of String.
 
 == Quick notes
-* Move all Fast code to fast/main.rb. Update Metafun/Delegator so it will inject the #delegate method into every Object instance. Reduce the "fast.rb" to a call to external libraries, fast/main and DSLization via #delegate.
+* Read bytes as binary ASCII-8BIT always and then try to perform an heuristic conversion, if there is any reasonable way to do it. Otherwise, leave it to the user.
 * Describe the SubSetter pattern for filtering. 
 * File lists as returned by Fast::Dir#list and Fast::Dir#dirs will be filtered after the list is retrieved by a set of filtering methods of the returned list, which should be an instance of Fast::Dir. 
 * An instance of Fast::Dir should be possible to be created from a Array.
