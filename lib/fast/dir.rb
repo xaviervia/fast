@@ -1,7 +1,6 @@
 module Fast
   # Directory handling class
   class Dir < Array
-    # .call -> like Fast::File.call -> NOUP: make delegator pattern Singleton-like
     def initialize path = nil
       super()
       @path = normalize path if path
@@ -9,7 +8,7 @@ module Fast
     
     # Returns a Fast::Dir list with all items in the directory, except ".." and "."
     def list path = nil, &block
-      @path = normalize path if path
+      @path = normalize path unless path.nil?
       ::Dir.foreach @path do |entry|
         unless entry == "." or entry == ".."
           self << entry 
