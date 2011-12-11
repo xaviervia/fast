@@ -5,35 +5,39 @@ require "zucker/os"
 ::File.unlink "demo.txt" if ::File.exist? "demo.txt"
 
 describe Fast::File do
-  describe "#append" do
+
+  shared_examples_for "any file content appending" do
     it "should create the file if it does not exist" do
       ::File.should_not exist "demo.txt"
-      Fast::File.new.append "demo.txt", "some text"
+      the_file = Fast::File.new "demo.txt"
+      the_file.send @method, "some text"
       ::File.should exist "demo.txt"
       ::File.unlink "demo.txt"
     end
-    
+
     it "should not erase the content of the file if it has some" do
       ::File.open "demo.txt", "w" do |file|
         file.write "some demo content"
       end
       
-      Fast::File.new.append "demo.txt", "\nmore demo content"
+      the_file = Fast::File.new "demo.txt"
+      the_file.send @method, "\nmore demo content"
       
       ::File.read( "demo.txt" ).should match /^some demo content/
       ::File.unlink "demo.txt"
     end
-    
+
     it "should append the new content last in the file" do
       ::File.open "demo.txt", "w" do |file|
         file.write "This comes first: "
       end
-      Fast::File.new.append "demo.txt", "and this comes after."
+      the_file = Fast::File.new "demo.txt"
+      the_file.send @method, "and this comes after."
       
       ::File.read( "demo.txt" ).should match /and this comes after.$/
       ::File.unlink "demo.txt"
     end
-    
+
     it "should update the modification time" do
       ::File.open "demo.txt", "w" do |file|
         file.write "Written earlier"
@@ -41,28 +45,18 @@ describe Fast::File do
       mtime = ::File.mtime "demo.txt"
       
       sleep 1
-      Fast::File.new.append "demo.txt", "\nWritten later"
+      the_file = Fast::File.new "demo.txt"
+      the_file.send @method, "\nWritten later"
       ::File.mtime( "demo.txt" ).should > mtime
       
       ::File.unlink "demo.txt"
-    end
-    
-    it "should return the file" do
-      the_file = ::Fast::File.new.append "demo.file", "Some content."
-      the_file.should be_a Fast::File
-      the_file.delete!
-    end
-    
-    it "should work even when a symbol is passed as argument" do
-      Fast::File.new.append :demo_txt, "Hola."
-      ::File.should exist "demo_txt"
-      ::File.unlink "demo_txt"
     end
 
     context "the file is inside a non existing directory" do
       it "should create the directory aswell as the file" do
         ::File.should_not be_directory "demo"
-        Fast::File.new.append "demo/demo.txt", "Nice content!"
+        the_file = Fast::File.new "demo/demo.txt"
+        the_file.send @method, "Nice content!"
         ::File.should be_directory "demo"
         ::File.unlink "demo/demo.txt"
         ::Dir.unlink "demo"
@@ -71,7 +65,21 @@ describe Fast::File do
   end
   
   describe "#<<" do
-    it "should behave almost like #append"
+    it_should_behave_like "any file content appending"
+    before :all do @method = :"<<" end
+  
+    it "should file if not path previously defined"
+  end
+  
+  describe "#append" do
+    it_should_behave_like "any file content appending"
+    before :all do @method = :append end        
+        
+    it "should return the file" do
+      the_file = ::Fast::File.new.append "demo.file", "Some content."
+      the_file.should be_a Fast::File
+      the_file.delete!
+    end
   end
   
   describe "#write" do
@@ -477,5 +485,29 @@ describe Fast::File do
     it "should delete the target file"
     
     it "should append the contents of the target into this"
+  end
+
+  shared_examples_for "any file copying" do
+    it "should exist the target file after the copy"
+    
+    it "should exist the source file after the copy"
+    
+    it "should contain the same content both the source and the target files"
+  end
+  
+  describe "#copy" do
+    it_behaves_like "any file copying"
+    
+    context "the target file exists" do
+      it "should fail"
+    end
+  end
+  
+  describe "#copy!" do
+    it_behaves_like "any file copying"
+    
+    context "the target file exists" do
+      it "should overwrite the target file"
+    end
   end
 end

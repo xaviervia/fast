@@ -22,11 +22,17 @@ module Fast
       else
         content = args.first
       end
-      Fast::Dir.new.create! ::File.dirname @path if ::File.dirname(@path) != "."
-      ::File.open @path, "a" do |handler|
-        handler.write content
-      end
-      self
+      
+      do_append content
+    end
+    
+    # Appends the passed content to the file
+    # Creates the file if it doesn't exist.
+    # Creates all the necesary folders if they don't exist
+    # Fails if file path is not defined
+    def << content
+      raise "No path specified in the file" unless @path
+      do_append content
     end
     
     # Writes data into the file. If is does not exist, creates it
@@ -61,7 +67,7 @@ module Fast
     # all required directories if they don't exist
     def touch path
       @path = normalize path if path
-      Fast::Dir.new.create ::File.dirname @path if ::File.dirname(@path) != "."
+      Fast::Dir.new.create! ::File.dirname @path if ::File.dirname(@path) != "."
       ::File.open @path, "a+" do |file|
         file.gets; file.write ""
       end
@@ -78,7 +84,7 @@ module Fast
     end
 
     # Returns true if file exists, false otherwise
-    def exist? path
+    def exist? path = nil
       @path = normalize path if path
       ::File.exist? @path
     end
@@ -142,6 +148,14 @@ module Fast
         "#{path}"
       end
     
+      def do_append content
+        touch @path unless exist?
+        ::File.open @path, "a" do |handler|
+          handler.write content
+        end
+        self
+      end
+
     # Deprecated!
     def self.call *args
       if args.empty?

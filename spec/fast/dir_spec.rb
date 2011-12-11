@@ -8,7 +8,7 @@ describe Fast::Dir do
         ::File.should_not be_directory "demo"
         Fast::File.new.touch "demo/myfile.txt"
         Fast::File.new.touch "demo/otherfile.txt"
-        Fast::Dir.new.create "demo/subdir"
+        Fast::Dir.new.create! "demo/subdir"
         
         iteration = []
         list = Fast::Dir.new.send @method, "demo" do |entry|
@@ -176,14 +176,30 @@ describe Fast::Dir do
     before :each do @method = :create end
     it_behaves_like "any dir creation"
     
-    it "should fail if the dir already exists"
+    it "should fail if the dir already exists" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.create :demo
+      expect { Fast::Dir.new.create :demo
+      }.to raise_error ArgumentError, "Dir 'demo' already exists"
+      Fast::Dir.new.delete! :demo
+    end
+    
+    after do
+      Fast::Dir.new.delete! :demo
+    end
   end
   
   describe "#create!" do
     before :each do @method = :create! end
     it_behaves_like "any dir creation"
     
-    it "should do nothing if the dir already exists"
+    it "should do nothing if the dir already exists" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.create :demo
+      expect { Fast::Dir.new.create! :demo
+      }.to_not raise_error ArgumentError, "Dir 'demo' already exists"
+      Fast::Dir.new.delete! :demo
+    end
   end
   
   shared_examples_for "any dir subsetter" do
@@ -474,21 +490,51 @@ describe Fast::Dir do
       it "should not erase current dir"
     end
     
-    it "should be present all of source data in the target"
+    it "should be present all of source data in the target" do
+      pending "File copy comes first" do
+        # All is clean
+        Fast::Dir.new.should_not exist :demo
+        Fast::Dir.new.should_not exist :target
+        
+        # Create demo data
+        Fast::File.new.touch "demo/content.txt"
+        Fast::File.new.touch "demo/more/content/in/subdir.txt"
+        
+        # Do the copying
+        Fast::Dir.new.send @method, :demo, :target
+        
+        # Check the copy
+        Fast::File.new.should exist "target/content.txt"
+        Fast::File.new.should exist "target/more/content/in/subdir.txt"
+      end
+    end
     
     it "should return current dir"
+    
+    after :all do
+      Fast::Dir.new.delete! :demo
+      Fast::Dir.new.delete! :target
+    end
   end
   
   describe "#copy" do
     it_behaves_like "any dir copy"
+    before :all do @method = :copy end
     
-    it "should fail if any conflict appears"
+    context "in case of conflict in any file" do
+      it "should fail"
+    
+      it "should not do any copying"
+    end
   end
   
   describe "#copy!" do
     it_behaves_like "any dir copy"
+    before :all do @method = :copy! end
     
-    it "should overwrite in every conflict"
+    context "in case of conflict" do
+      it "should overwrite"
+    end
   end
   
   describe "#merge" do

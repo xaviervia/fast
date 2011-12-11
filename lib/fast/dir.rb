@@ -44,9 +44,26 @@ module Fast
       self
     end
 
-    # Creates the dir, if it doesn't exist. Otherwise remains silent
+    # Creates the dir, if it doesn't exist. Otherwise raises an ArgumentException
     # Returns the last dir path passed as argument
     def create *args
+      raise ArgumentError, "No arguments passed, at least one is required" if args.empty?
+      if args.length > 0
+        return_me = nil
+        args.each do |path|
+          raise ArgumentError, "Dir '#{path}' already exists" if Dir.new.exist? path
+          return_me = do_create path
+        end
+        return return_me
+      else
+        raise ArgumentError, "Dir '#{@path}' already exists" if Dir.new.exist? @path
+        do_create
+      end
+    end
+
+    # Creates the dir, if it doesn't exist. Otherwise remains silent
+    # Returns the last dir path passed as argument
+    def create! *args
       raise ArgumentError, "No arguments passed, at least one is required" if args.empty?
       if args.length > 0
         return_me = nil
@@ -58,8 +75,6 @@ module Fast
         do_create
       end
     end
-    
-    alias :create! :create
   
     # Deletes the directory along with all its content. Powerful, simple, risky!
     # Many arguments can be passed
@@ -181,6 +196,22 @@ module Fast
       end
       
       Dir.new.delete target
+    end
+    
+    def copy *args
+      if args.length > 1
+        current, target = *args
+        @path = normalize current
+        target = normalize target
+      else
+        target = normalize args.first
+      end
+      
+      list do |entry|
+        if File.new.exist? "#{@path}/#{entry}" # If is a file, this should be more obvious
+          raise "File copy?"
+        end
+      end
     end
     
     private
