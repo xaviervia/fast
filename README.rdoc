@@ -6,11 +6,13 @@ Library is pure Ruby 1.8.7, no FileUtils nor other dependencies (except Metafun 
 
 == Installation
 
-Don't install right now, as 13-09-2011 this is pre-alpha, but in intensive development.
+  gem install fast
+
+Cucumber features still to do, but specs are stable (2011-12-11)
 
 == Philosophy
 
-<tt>Fast</tt> embraces the more straightforward view of files as strings of data and directories as arrays of files/directories. Some arguments:
+<tt>Fast</tt> embraces the more straightforward view of files as strings of data and directories as arrays of files/directories. Some reasons:
 
 * It is more realistic in everyday usage
 * It makes them more object-like (and thus, more friendly to OOP)
@@ -21,7 +23,7 @@ Don't install right now, as 13-09-2011 this is pre-alpha, but in intensive devel
 
 == Quick notes
 * Read bytes as binary ASCII-8BIT always and then try to perform an heuristic conversion, if there is any reasonable way to do it. Otherwise, leave it to the user. Google: "ruby string encode utf-8 ascii" for some good readings.
-* Describe the SubSetter pattern for filtering. 
+* Apply the SubSetter pattern for filtering instead of FileFilter and DirFilter ad described in http://xaviervia.com.ar/patterns/sub-setter
 * File lists as returned by Fast::Dir#list and Fast::Dir#dirs will be filtered after the list is retrieved by a set of filtering methods of the returned list, which should be an instance of Fast::Dir. 
 * An instance of Fast::Dir should be possible to be created from a Array.
 * The path can be setted indirectly by any method of Fast::File instances, and the same works for Dir. This is fine because allows for very quick calls, but once an instance gets a path setted it should be fixed and raise an exception in case some other method call is trying to change it.
