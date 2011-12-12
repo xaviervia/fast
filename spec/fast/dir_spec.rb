@@ -112,6 +112,16 @@ describe Fast::Dir do
       }.to raise_error ArgumentError, "No arguments passed, at least one is required"
     end
     
+    context "from an existing Dir object" do
+      it "should create the dir" do
+        Fast::Dir.new.should_not exist :demo
+        the_dir = Fast::Dir.new :demo
+        the_dir.send @method
+        the_dir.should exist
+        the_dir.remove
+      end
+    end
+    
     context "is a simple path" do
       it "should create the dir" do
         ::File.should_not be_directory "demo"
@@ -329,6 +339,27 @@ describe Fast::Dir do
     end
   end
   
+  describe "#remove" do
+    before :each do @method = :remove end
+    it_behaves_like "any dir deletion" 
+
+    it "should fail if the directory does not exist" do
+      ::File.should_not be_directory "demo"
+      expect { Fast::Dir.new.send @method, "demo"
+      }.to raise_error
+    end
+  end
+  
+  describe "#remove!" do
+    before :each do @method = :remove! end
+    it_behaves_like "any dir deletion"
+    
+    it "should not fail even if the directory does not exist" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.remove! :demo
+    end
+  end
+  
   shared_examples_for "any dir existencialism" do
     it "should return true if the dir exists" do
       ::File.should_not be_directory "demo"
@@ -353,11 +384,76 @@ describe Fast::Dir do
     it_behaves_like "any dir existencialism"
   end
   
-  describe "#exist_all?"
+  describe "#exist_all?" do
+    before :each do @method = :exist_all? end
+    it_behaves_like "any dir existencialism"
+    
+    it "should return true if all exist" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.should_not exist :demo2
+      Fast::Dir.new.should_not exist :demo3
+      
+      Fast::Dir.new.create :demo, :demo2, :demo3
+      
+      Fast::Dir.new.exist_all?(:demo, :demo2, :demo3).should be_true
+      
+      Fast::Dir.new.remove :demo, :demo2, :demo3
+    end
+    
+    it "should return false if any does not exist" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.should_not exist :demo2
+      Fast::Dir.new.should_not exist :demo3
+      
+      Fast::Dir.new.create :demo, :demo2
+      
+      Fast::Dir.new.exist_all?(:demo, :demo2, :demo3).should be_false
+      
+      Fast::Dir.new.remove :demo, :demo2
+    end
+  end
 
-  describe "#exist_any?"
+  describe "#exist_any?" do
+    it_behaves_like "any dir existencialism"
+    before :each do @method = :exist_any? end
+    
+    it "should return true if at least one exists" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.should_not exist :demo2
+      Fast::Dir.new.should_not exist :demo3
+      
+      Fast::Dir.new.create :demo, :demo2
+      
+      Fast::Dir.new.exist_any?(:demo, :demo2, :demo3).should be_true
+      
+      Fast::Dir.new.remove! :demo, :demo2, :demo3
+    end
+    
+    it "should return false if none exists" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.should_not exist :demo2
+      Fast::Dir.new.should_not exist :demo3
+            
+      Fast::Dir.new.exist_any?(:demo, :demo2, :demo3).should be_false
+    end
+  end
   
-  describe "#exist_which"
+  describe "#exist_which" do
+    it "should return a list with the dir that exists" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.should_not exist :demo2
+      Fast::Dir.new.should_not exist :demo3
+      
+      Fast::Dir.new.create :demo, :demo2
+      
+      the_list = Fast::Dir.new.exist_which :demo, :demo2, :demo3
+      the_list.should include :demo
+      the_list.should include :demo2
+      the_list.should_not include :demo3
+      
+      Fast::Dir.new.remove! :demo, :demo2, :demo3
+    end
+  end
   
   describe ".new" do
     it "should accept a string path as argument" do
@@ -490,36 +586,52 @@ describe Fast::Dir do
   end
   
   shared_examples_for "any dir copy" do
-    context "target dir do not exist" do
-      it "should create the target dir"
-      
-      it "should not erase current dir"
+    before :each do 
+      Fast::Dir.new.should_not exist :demo      
+      Fast::Dir.new.should_not exist :target
     end
     
-    it "should be present all of source data in the target" do
-      pending "File copy comes first" do
-        # All is clean
-        Fast::Dir.new.should_not exist :demo
-        Fast::Dir.new.should_not exist :target
+    context "target dir do not exist" do
+      it "should create the target dir" do
+        Fast::Dir.new.create :demo
         
-        # Create demo data
-        Fast::File.new.touch "demo/content.txt"
-        Fast::File.new.touch "demo/more/content/in/subdir.txt"
-        
-        # Do the copying
         Fast::Dir.new.send @method, :demo, :target
         
-        # Check the copy
-        Fast::File.new.should exist "target/content.txt"
-        Fast::File.new.should exist "target/more/content/in/subdir.txt"
+        Fast::Dir.new.should exist :target
+      end
+      
+      it "should not erase current dir" do
+        Fast::Dir.new.create :demo
+        
+        Fast::Dir.new.send @method, :demo, :target
+        
+        Fast::Dir.new.should exist :demo
       end
     end
     
-    it "should return current dir"
+    it "should be present all of source data in the target" do        
+      # Create demo data
+      Fast::File.new.touch "demo/content.txt"
+      Fast::File.new.touch "demo/more/content/in/subdir.txt"
+      Fast::Dir.new.create "demo/empty_dir"
+      
+      # Do the copying
+      Fast::Dir.new.send @method, :demo, :target
+      
+      # Check the copy
+      Fast::File.new.should exist "target/content.txt"
+      Fast::File.new.should exist "target/more/content/in/subdir.txt"
+      Fast::Dir.new.should exist "target/empty_dir"
+    end
     
-    after :all do
-      Fast::Dir.new.delete! :demo
-      Fast::Dir.new.delete! :target
+    it "should return the current dir" do
+      the_dir = Fast::Dir.new.create! :demo
+      # Do the copying
+      the_dir.send(@method, :target).should be the_dir      
+    end
+    
+    after :each do
+      Fast::Dir.new.delete! :demo, :target
     end
   end
   
@@ -580,7 +692,7 @@ describe Fast::Dir do
       Fast::File.new.should exist "demo/data/nested/is.informative.file"
     end
     
-    context "two fails in the source and target have the same name" do
+    context "two files in the source and target have the same name" do
       it "should fail"
       
       it "should not do any changes in any dir"
@@ -596,7 +708,7 @@ describe Fast::Dir do
     it "should behave like #merge but never fail"
   end
 
-  describe "#mergeable?" do
+  describe "#conflicts?" do
     context "both dirs exist and no file or dir in any has the same name in the other" do
       it "should return true"
     end
@@ -604,26 +716,78 @@ describe Fast::Dir do
     context "some files in target dir have the same name as other in source" do
       it "should return false"
     end
-    
-    it "should fail it the target dir does not exist"
   end
   
   describe "#[]" do
+    before :each do
+      Fast::Dir.new.should_not exist :demo
+    end
+    
     context "a file named like the argument exists" do
-      it "should return it"
+      it "should return it" do
+        Fast::File.new.touch "demo/file.txt"
+        
+        the_file = Fast::Dir.new(:demo)["file.txt"]
+        the_file.path.should == "demo/file.txt"
+      end
     end
     
     context "a dir named like the argument exists" do
-      it "should return it"
+      it "should return it" do
+        Fast::Dir.new.create "demo/other_dir"
+        the_dir = Fast::Dir.new(:demo)[:other_dir]
+        the_dir.path.should == "demo/other_dir"
+      end
+    end
+    
+    context "an integet is sent" do
+      it "should behave like an array" do
+        Fast::File.new.touch "demo/file.txt"
+        
+        Fast::Dir.new.list(:demo)[0].should == "file.txt"
+      end
     end
     
     context "there's nothing there" do
-      it "should return nil"
+      it "should return nil" do
+        Fast::Dir.new.create :demo
+        Fast::Dir.new.list(:demo)[:no].should be_nil
+      end
+    end
+
+    after :each do
+      Fast::Dir.new.delete! :demo
     end
   end
   
   describe "#[]=" do # This is an absolute WIN
-    it "should create the file with the given content"
+    before :each do 
+      Fast::Dir.new.should_not exist :demo
+    end
+    
+    context "the content is a String" do
+      it "should create the file with the given content" do
+        the_dir = Fast::Dir.new :demo # Showoff..
+        the_dir[:Pianofile] = "set :port, 80" # So condensed, so solid
+        Fast::File.new.read("demo/Pianofile").should == "set :port, 80"
+      end
+      
+      it "should create self" do
+        the_dir = Fast::Dir.new :demo # Showoff..
+        the_dir[:Pianofile] = "set :port, 80" # So condensed, so solid
+        Fast::Dir.new.should exist :demo
+      end
+    end
+    
+    context "the content is a hash" do
+      it "should create the subdir"
+      
+      it "should create recursively the tree"
+    end
+    
+    after :each do 
+      Fast::Dir.new.delete! :demo
+    end
   end
 
 end

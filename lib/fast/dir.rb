@@ -47,7 +47,6 @@ module Fast
     # Creates the dir, if it doesn't exist. Otherwise raises an ArgumentException
     # Returns the last dir path passed as argument
     def create *args
-      raise ArgumentError, "No arguments passed, at least one is required" if args.empty?
       if args.length > 0
         return_me = nil
         args.each do |path|
@@ -56,15 +55,15 @@ module Fast
         end
         return return_me
       else
+        raise ArgumentError, "No arguments passed, at least one is required" unless @path
         raise ArgumentError, "Dir '#{@path}' already exists" if Dir.new.exist? @path
-        do_create
+        do_create @path
       end
     end
 
     # Creates the dir, if it doesn't exist. Otherwise remains silent
     # Returns the last dir path passed as argument
     def create! *args
-      raise ArgumentError, "No arguments passed, at least one is required" if args.empty?
       if args.length > 0
         return_me = nil
         args.each do |path|
@@ -72,7 +71,8 @@ module Fast
         end
         return return_me
       else
-        do_create
+        raise ArgumentError, "No arguments passed, at least one is required" unless @path
+        do_create @path
       end
     end
   
@@ -93,6 +93,7 @@ module Fast
     alias :destroy :delete
     alias :del :delete
     alias :unlink :delete
+    alias :remove :delete
     
     # Like #delete, but raises no error if some directory is missing
     def delete! *args
@@ -115,6 +116,8 @@ module Fast
       end
     end
     
+    alias :remove! :delete!
+    
     # Checks for existence. True if the directory exists, false otherwise
     def exist? path = nil
       @path = normalize path if path
@@ -122,6 +125,45 @@ module Fast
     end
     
     alias :exists? :exist?
+   
+    # Returns true if all passed dirs exist, false otherwise
+    def exist_all? *args
+      unless args.empty?
+        args.each do |path|
+          return false if not Dir.new.exist? path
+        end
+        return true
+      else
+        exist?
+      end
+    end
+    
+    # Returns true if any of passed dirs exists, false otherwise
+    def exist_any? *args
+      unless args.empty?
+        args.each do |path|
+          return true if Dir.new.exist? path
+        end
+        return false
+      else
+        exist?
+      end
+    end
+    
+    # Return a list with the existing dirs path
+    # Note: This should be delegated to the SubSetter::Fast::Dir
+    def exist_which *args
+      if args.empty?
+        raise ArgumentError, "Wrong number of arguments, at least one dir should be passed"
+      end
+      
+      existing_ones = []
+      args.each do |path|
+        existing_ones << path if Dir.new.exist? path
+      end
+
+      return existing_ones
+    end
   
     # Returns a String brief of the dir
     def to_s
@@ -202,15 +244,37 @@ module Fast
       if args.length > 1
         current, target = *args
         @path = normalize current
-        target = normalize target
+        target = Dir.new target
       else
-        target = normalize args.first
+        target = Dir.new args.first
       end
       
+      target.create
       list do |entry|
-        if File.new.exist? "#{@path}/#{entry}" # If is a file, this should be more obvious
-          raise "File copy?"
+        if File.new.exist? "#{@path}/#{entry}" # This is a "is file?" check and should be more obvious
+          File.new.copy "#{@path}/#{entry}", "#{target.path}/#{entry}"
+        else # is a Dir then
+          Dir.new.copy "#{@path}/#{entry}", "#{target.path}/#{entry}"
         end
+      end
+    end
+    
+    alias :copy! :copy
+    
+    def [] name
+      if name.is_a? Integer # I do not wish to disable Array behaviour
+        super
+      else
+        return Dir.new "#{@path}/#{name}" if dirs.include? normalize name
+        return File.new "#{@path}/#{name}" if files.include? normalize name
+      end
+    end
+    
+    def []= name, content
+      if name.is_a? Integer # I do not wish to disable Array behaviour
+        super 
+      else
+        return File.new.write "#{@path}/#{name}", content       
       end
     end
     
