@@ -353,6 +353,12 @@ describe Fast::Dir do
     it_behaves_like "any dir existencialism"
   end
   
+  describe "#exist_all?"
+
+  describe "#exist_any?"
+  
+  describe "#exist_which"
+  
   describe ".new" do
     it "should accept a string path as argument" do
       Fast::Dir.new "demo"

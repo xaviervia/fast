@@ -51,27 +51,53 @@ module Fast
       self
     end
     
-    # Deletes the file (wrapper for `File.unlink <path>`)
-    def delete path = nil
-      @path = normalize path if path
-      ::File.unlink @path
-      @path
+    # Deletes the files (wrapper for `File.unlink <path>`)
+    # Fails if file does not exist
+    def delete *args
+      unless args.empty?
+        return_me = nil
+        args.each do |path|
+          return_me = normalize path
+          ::File.unlink return_me
+        end
+        return return_me
+      else
+        ::File.unlink @path
+        @path
+      end
     end
   
     alias :destroy :delete
     alias :unlink :delete
     alias :del :delete
-    alias :delete! :delete
+    
+    # Deletes the file(s) if it exists, does nothing otherwise
+    def delete! *args
+      unless args.empty?
+        return_me = nil
+        args.each do |path|
+          return_me = normalize path
+          ::File.unlink return_me if File.new.exist? path
+        end
+        return return_me
+      else
+        ::File.unlink @path if exist?
+        @path
+      end
+    end
     
     # Touches the file passed. Like bash `touch`, but creates
     # all required directories if they don't exist
-    def touch path
-      @path = normalize path if path
-      Fast::Dir.new.create! ::File.dirname @path if ::File.dirname(@path) != "."
-      ::File.open @path, "a+" do |file|
-        file.gets; file.write ""
+    def touch *args
+      if args.length > 0
+        return_me = nil
+        args.each do |path|
+          return_me = do_create path
+        end
+        return return_me
+      else
+        do_create @path
       end
-      @path
     end
     
     alias :create :touch
@@ -86,12 +112,43 @@ module Fast
     # Returns true if file exists, false otherwise
     def exist? path = nil
       @path = normalize path if path
-      ::File.exist? @path
+      do_check_existence @path
     end
     
     alias :exists? :exist?
-    alias :exist_all? :exist?
-    alias :exist_any? :exist?
+    
+    def exist_all? *args
+      unless args.empty?
+        return_me = true
+        args.each do |path|
+          return_me &= do_check_existence path
+        end
+        return return_me
+      else
+        do_check_existence @path
+      end
+    end
+    
+    def exist_any? *args
+      unless args.empty?
+        return_me = false
+        args.each do |path|
+          return_me |= do_check_existence path
+        end
+        return return_me
+      else
+        do_check_existence @path
+      end
+    end
+    
+    def exist_which *args
+      raise ArgumentError, "Wrong number of arguments (at least one is needed)" if args.empty?
+      return_list = []
+      args.each do |path|
+        return_list << path if do_check_existence path
+      end
+      return_list
+    end
     
     # Sends self to a FileFilter filter
     def filter
@@ -143,10 +200,76 @@ module Fast
       @path if @path
     end
     
+    # Appends the contents of the target file into self and erase the target
+    def merge *args
+      if args.length > 1
+        source, target = *args
+        @path = normalize source
+        target = File.new target
+      else
+        target = File.new args.first
+      end
+      
+      raise Errno::ENOENT, "No such file - #{@path}" unless exist?
+      raise Errno::ENOENT, "No such file - #{target.path}" unless target.exist?
+      
+      append target.read
+      target.delete!
+      self
+    end
+    
+    # Returns true if the file is empty or does not exist
+    def empty? path = nil
+      @path = normalize path if path
+      return true if not exist?
+      read.empty?
+    end
+    
+    # Copies current file into target file. Does not rely on OS nor FileUtils
+    def copy *args
+      if args.length > 1
+        current, target = *args
+        @path = normalize current
+        target = File.new target
+      else
+        target = File.new args.first
+      end
+      
+      raise ArgumentError, "Target '#{target.path}' already exists." if target.exist?
+      do_copy target
+    end
+    
+    def copy! *args
+      if args.length > 1
+        current, target = *args
+        @path = normalize current
+        target = File.new target
+      else
+        target = File.new args.first
+      end
+      
+      do_copy target
+    end
+    
     private
       def normalize path
         "#{path}"
       end
+      
+      def do_copy target
+        target.write read
+        target
+      end
+            
+      def do_create path
+        path = normalize path
+        Fast::Dir.new.create! ::File.dirname path if ::File.dirname(path) != "."
+        ::File.open path, "a+" do |file|
+          file.gets; file.write ""
+        end
+        path
+      end
+
     
       def do_append content
         touch @path unless exist?
@@ -154,6 +277,10 @@ module Fast
           handler.write content
         end
         self
+      end
+      
+      def do_check_existence path
+        ::File.exist?(path) && !::File.directory?(path)
       end
 
     # Deprecated!

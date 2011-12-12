@@ -68,7 +68,11 @@ describe Fast::File do
     it_should_behave_like "any file content appending"
     before :all do @method = :"<<" end
   
-    it "should file if not path previously defined"
+    it "should fail if not path previously defined" do
+      the_file = Fast::File.new
+      expect { the_file << "More content"
+      }.to raise_error "No path specified in the file"
+    end
   end
   
   describe "#append" do
@@ -142,6 +146,16 @@ describe Fast::File do
       Fast::File.new.send @method, :demo_txt
       ::File.should_not exist "demo.txt"
     end
+    
+    it "should accept multiple arguments" do
+      Fast::File.new.should_not exist "demo1.txt"
+      Fast::File.new.should_not exist "demo2.txt"
+      Fast::File.new.should_not exist "demo3.txt"
+    
+      Fast::File.new.touch "demo1.txt", "demo2.txt", "demo3.txt"
+      
+      Fast::File.new.send @method, "demo1.txt", "demo2.txt", "demo3.txt"
+    end
   end
   
   describe "#delete" do
@@ -152,6 +166,12 @@ describe Fast::File do
   describe "#delete!" do
     before :each do @method = :delete! end
     it_behaves_like "any file deletion" 
+    
+    it "should not fail if the file does not exist" do
+      Fast::File.new.should_not exist "the_file.txt"
+      expect { Fast::File.new.delete! "the_file.txt"
+      }.to_not raise_error
+    end
   end
   
   describe "#unlink" do
@@ -237,7 +257,21 @@ describe Fast::File do
       ::File.unlink "demo_txt"
     end
     
-    it "should work with multiple arguments"
+    it "should work with multiple arguments" do
+      Fast::File.new.should_not exist "demo1.txt" 
+      Fast::File.new.should_not exist "demo2.txt" 
+      Fast::File.new.should_not exist "demo3.txt"
+      
+      Fast::File.new.send @method, "demo1.txt", "demo2.txt", "demo3.txt"
+      
+      Fast::File.new.should exist "demo1.txt"
+      Fast::File.new.should exist "demo2.txt"
+      Fast::File.new.should exist "demo3.txt"
+      
+      Fast::File.new.delete "demo1.txt"
+      Fast::File.new.delete "demo2.txt"
+      Fast::File.new.delete "demo3.txt" 
+    end
   end
   
   describe "#create" do
@@ -323,7 +357,12 @@ describe Fast::File do
       Fast::File.new.send( @method, "demo.file" ).should be_false
     end
     
-    it "should return false if path represents a directory!"
+    it "should return false if path represents a directory!" do
+      Fast::Dir.new.should_not exist "demo"
+      Fast::Dir.new.create "demo"
+      Fast::File.new.send( @method, "demo" ).should be_false
+      Fast::Dir.new.delete "demo"
+    end
   end
   
   describe "#exist?" do
@@ -340,25 +379,105 @@ describe Fast::File do
     before :each do @method = :exist_all? end
     it_behaves_like "any file existencialism"
     
-    it "should return true if all exist"
+    it "should return true if all exist" do
+      # Create the demo files
+      Fast::File.new.touch "demo1.txt", "demo2.txt", "demo3.txt"
+      
+      # Try it
+      Fast::File.new.exist_all?("demo1.txt", "demo2.txt", "demo3.txt").should be_true
+    end
     
-    it "should return false if any does not exist"
+    it "should return false if any does not exist" do
+      Fast::File.new.touch "demo1.txt", "demo2.txt", "demo3.txt"
+      Fast::File.new.should_not exist "demo4.txt"
+      
+      Fast::File.new.exist_all?("demo2.txt", "demo4.txt", "demo1.txt").should be_false
+    end
+  
+    after :all do
+      # Clean after deeds
+      Fast::File.new.delete! "demo1.txt"
+      Fast::File.new.delete! "demo2.txt"
+      Fast::File.new.delete! "demo3.txt"
+    end
   end
   
   describe "#exist_any?" do
     before :each do @method = :exist_any? end
     it_behaves_like "any file existencialism"
     
-    it "should return true if at least one exists"
+    it "should return true if at least one exists" do
+      Fast::File.new.touch "demo1.txt"
+      Fast::File.new.should_not exist "demo2.txt"
+      
+      Fast::File.new.exist_any?("demo1.txt", "demo2.txt").should be_true
+    end
     
-    it "should return false if none exist"
+    it "should return false if none exist" do
+      Fast::File.new.should_not exist "demo2.txt"
+      Fast::File.new.should_not exist "demo3.txt"
+      
+      Fast::File.new.exist_any?("demo2.txt", "demo3.txt").should be_false
+    end
+    
+    after :all do 
+      Fast::File.new.delete "demo1.txt"
+    end
+  end
+  
+  describe "#exist_which" do
+    it "should return a list with the files that exist" do
+      Fast::File.new.should_not exist "demo1.txt"
+      Fast::File.new.should_not exist "demo2.txt"
+      Fast::File.new.should_not exist "demo3.txt"
+
+      Fast::File.new.touch "demo1.txt", "demo2.txt"
+      the_files = Fast::File.new.exist_which "demo1.txt", "demo2.txt", "demo3.txt"
+      the_files.should include "demo1.txt"
+      the_files.should include "demo2.txt"
+      the_files.should_not include "demo3.txt"      
+    end
+
+    after :all do
+      Fast::File.new.delete "demo1.txt"
+      Fast::File.new.delete "demo2.txt"
+    end
+  end
+  
+  describe "#empty?" do
+    it "should return true if the file has no content" do
+      Fast::File.new.should_not exist "demo.txt"
+      Fast::File.new.touch "demo.txt"
+      
+      Fast::File.new.empty?("demo.txt").should be_true
+    end
+    
+    it "should return true if the file does not exist" do
+      Fast::File.new.should_not exist "demo.txt"
+      
+      Fast::File.new.empty?("demo.txt").should be_true
+    end
+    
+    it "should return false if the file has content" do
+      Fast::File.new.should_not exist "demo.txt"
+      Fast::File.new.write "demo.txt", "Some irrelevant content."
+      
+      Fast::File.new.empty?("demo.txt").should be_false
+    end
+    
+    after :each do 
+      Fast::File.new.delete! "demo.txt"
+    end
   end
   
   shared_examples_for "any file subsetter" do
+    # This should follow more precisely the SubSetter pattern as specified
+    # on http://xaviervia.com.ar/patterns/sub-setter
+    #
     # This is a reminder: along with Serializer, the Subsetter pattern
     # (and later, the Sorting one) should be implemented Fast
-    
-    # I guess filtering in Fast will be done in Fast::FileFilter
+    #
+    # Fast::FileFilter will be deprecated soon
     it "should forward self to a filtering object" do      
       the_demo_file = Fast::File.new :demo
       Fast::FileFilter.should_receive( :new ).with the_demo_file
@@ -482,32 +601,117 @@ describe Fast::File do
   end
   
   describe "#merge" do
-    it "should delete the target file"
+    before :each do
+      Fast::File.new.should_not exist "demo.txt"
+      Fast::File.new.should_not exist "target.txt"
+      
+      Fast::File.new.write "demo.txt", "Basic content"
+      Fast::File.new.write "target.txt", "\nSome extra content"
+    end
+
+    it "should delete the target file" do      
+      Fast::File.new.merge "demo.txt", "target.txt"
+      
+      Fast::File.new.should_not exist "target.txt"
+      Fast::File.new.should exist "demo.txt"
+    end
     
-    it "should append the contents of the target into this"
+    it "should append the contents of the target into this" do
+      Fast::File.new.merge "demo.txt", "target.txt"
+      
+      Fast::File.new.read("demo.txt").should include "Basic content\nSome extra content"
+    end
+    
+    it "should return self" do
+      the_file = Fast::File.new "demo.txt"
+      the_file.merge("target.txt").should be the_file
+    end
+    
+    context "some is missing" do
+      it "should fail if self is missing" do 
+        expect { Fast::File.new.merge "hola.txt", "target.txt"
+        }.to raise_error Errno::ENOENT
+      end
+      
+      it "should fail if target is missing" do
+        expect { Fast::File.new.merge "demo.txt", "hola.txt"
+        }.to raise_error Errno::ENOENT
+      end
+    end
+    
+    after :each do
+      Fast::File.new.delete! "demo.txt"
+      Fast::File.new.delete! "target.txt"
+    end
   end
 
   shared_examples_for "any file copying" do
-    it "should exist the target file after the copy"
+    before :each do 
+      Fast::File.new.should_not exist "demo.txt"
+      Fast::File.new.write "demo.txt", "Need for content"
+    end
     
-    it "should exist the source file after the copy"
+    it "should exist the target file after the copy" do
+      Fast::File.new.send @method, "demo.txt", "target.txt"
+      
+      Fast::File.new.should exist "target.txt"
+    end
     
-    it "should contain the same content both the source and the target files"
+    it "should exist the source file after the copy" do
+      Fast::File.new.send @method, "demo.txt", "target.txt"
+      
+      Fast::File.new.should exist "demo.txt"      
+    end
+    
+    it "should contain the same content both the source and the target files" do
+      Fast::File.new.send @method, "demo.txt", "target.txt"
+      
+      Fast::File.new.read("demo.txt").should == Fast::File.new.read("target.txt")
+    end
+    
+    after :each do 
+      Fast::File.new.delete! "demo.txt"
+      Fast::File.new.delete! "target.txt"
+    end
   end
   
   describe "#copy" do
     it_behaves_like "any file copying"
+    before :all do @method = :copy end
     
     context "the target file exists" do
-      it "should fail"
+      it "should fail" do
+        Fast::File.new.should_not exist "demo.txt"
+        Fast::File.new.should_not exist "target.txt"
+        Fast::File.new.write "demo.txt", "Once upon a time."
+        Fast::File.new.write "target.txt", "A hobbit there was."
+        
+        expect { Fast::File.new.copy "demo.txt", "target.txt"
+        }.to raise_error ArgumentError, "Target 'target.txt' already exists."
+        
+        Fast::File.new.delete! "demo.txt"
+        Fast::File.new.delete! "target.txt"
+      end
     end
   end
   
   describe "#copy!" do
     it_behaves_like "any file copying"
+    before :all do @method = :copy! end
     
     context "the target file exists" do
-      it "should overwrite the target file"
+      it "should overwrite the target file" do
+        Fast::File.new.should_not exist "demo.txt"
+        Fast::File.new.should_not exist "target.txt"
+        Fast::File.new.write "demo.txt", "Once upon a time."
+        Fast::File.new.write "target.txt", "A hobbit there was."
+        
+        Fast::File.new.copy! "demo.txt", "target.txt"
+        Fast::File.new.read("demo.txt").should == Fast::File.new.read("target.txt")
+        
+        Fast::File.new.delete! "demo.txt"
+        Fast::File.new.delete! "target.txt"        
+      end
     end
   end
 end
