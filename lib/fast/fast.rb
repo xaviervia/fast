@@ -3,7 +3,7 @@ module Fast
   def self.dir path = nil
     unless path.nil?
       the_dir = Fast::Dir.new path
-      the_dir.list
+      the_dir.list if the_dir.exist?
     else 
       Fast::Dir.new
     end
