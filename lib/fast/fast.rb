@@ -18,7 +18,7 @@ module Fast
   def self.file path = nil
     if path
       the_file = Fast::File.new path 
-      the_file.read
+      the_file.read if the_file.exist?
     else 
       Fast::File.new
     end
