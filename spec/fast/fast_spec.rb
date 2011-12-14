@@ -6,13 +6,18 @@ describe Fast do
       Fast.dir.should be_a Fast::Dir
     end
     
-    context "a path to a dir is passed" do      
+    context "a path to a dir is passed and the dir exists" do      
       it "should call #list on that instance" do
+        Fast.dir! :Demo
         module Fast
           Dir.any_instance.should_receive :list
         end
         
         Fast.dir :demo
+      end
+      
+      after :each do 
+        Fast.dir.delete! :demo
       end
     end
   end
