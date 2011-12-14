@@ -8,7 +8,7 @@ describe Fast do
     
     context "a path to a dir is passed and the dir exists" do      
       it "should call #list on that instance" do
-        Fast.dir! :Demo
+        Fast.dir! :demo
         module Fast
           Dir.any_instance.should_receive :list
         end
@@ -17,7 +17,7 @@ describe Fast do
       end
       
       after :each do 
-        Fast.dir.delete! :demo
+        ::Dir.unlink "demo"
       end
     end
   end

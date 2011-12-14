@@ -4,6 +4,7 @@ module Fast
     unless path.nil?
       the_dir = Fast::Dir.new path
       the_dir.list if the_dir.exist?
+      the_dir
     else 
       Fast::Dir.new
     end
@@ -19,6 +20,7 @@ module Fast
     if path
       the_file = Fast::File.new path 
       the_file.read if the_file.exist?
+      the_file
     else 
       Fast::File.new
     end
