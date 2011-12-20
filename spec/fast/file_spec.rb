@@ -6,6 +6,10 @@ require "zucker/os"
 
 describe Fast::File do
 
+  context "a Fast::File is passed as argument where a path is accepted" do
+    it "should be accepted"
+  end
+
   shared_examples_for "any file content appending" do
     it "should create the file if it does not exist" do
       ::File.should_not exist "demo.txt"
@@ -592,6 +596,43 @@ describe Fast::File do
       Fast::File.new.write "demo.file", "Demo content bores me"
       
       Fast::File.new.rename! "demo.file", "renamed.file"
+      
+      Fast::File.new.should_not exist "demo.file"
+      Fast::File.new.read( "renamed.file" ).should == "Demo content bores me"
+      
+      Fast::File.new.delete! "renamed.file"
+    end
+  end
+  
+  describe "#move" do
+    before :all do @method = :move end
+    it_behaves_like "any file renaming"
+    
+    it "should fail if a file named as the new name exists" do
+      Fast::File.new.should_not exist "demo.file"
+      Fast::File.new.should_not exist "renamed.file"
+      Fast::File.new.touch "renamed.file"
+      Fast::File.new.write "demo.file", "Demo content bores me"
+      
+      expect { Fast::File.new.move "demo.file", "renamed.file"
+      }.to raise_error ArgumentError, "The file 'renamed.file' already exists"
+      
+      Fast::File.new.delete! "demo.file"
+      Fast::File.new.delete! "renamed.file"
+    end
+  end
+  
+  describe "#move!" do
+    before :all do @method = :move! end
+    it_behaves_like "any file renaming"
+
+    it "should overwrite the new file if it exists" do
+      Fast::File.new.should_not exist "demo.file"
+      Fast::File.new.should_not exist "renamed.file"
+      Fast::File.new.touch "renamed.file"
+      Fast::File.new.write "demo.file", "Demo content bores me"
+      
+      Fast::File.new.move! "demo.file", "renamed.file"
       
       Fast::File.new.should_not exist "demo.file"
       Fast::File.new.read( "renamed.file" ).should == "Demo content bores me"
