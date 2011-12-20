@@ -2,6 +2,13 @@ require "fast"
 require "zucker/os"
 
 describe Fast::Dir do
+
+  context "a Fast::Dir is passed as argument where a path is accepted" do
+    it "should be accepted"
+    
+    it "should I really think of a common denominator of Fast::Dir and Fast::File?"
+  end
+  
   shared_examples_for "any dir list" do 
     context "a block is passed as an argument" do
       it "should pass each entry as argument to the block" do
@@ -579,6 +586,40 @@ describe Fast::Dir do
       Fast::File.new.touch "renamed/erase.me"
       
       Fast::Dir.new.rename! :demo, :renamed
+      Fast::File.new.should_not exist "renamed/erase.me"
+      Fast::File.new.should exist "renamed/content.file"
+      Fast::Dir.new.delete! :renamed
+    end
+  end
+  
+
+  describe "#move" do
+    before :all do @method = :move end
+    it_behaves_like "any dir renaming"    
+    
+    it "should fail if the new path represents an existing dir" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.should_not exist :renamed
+      Fast::Dir.new.create! :demo
+      Fast::Dir.new.create! :renamed
+      expect { Fast::Dir.new.move :demo, :renamed
+      }.to raise_error ArgumentError, "The target directory 'renamed' already exists"
+      Fast::Dir.new.delete! :demo
+      Fast::Dir.new.delete! :renamed
+    end
+  end
+  
+  describe "#move!" do
+    before :all do @method = :move! end
+    it_behaves_like "any dir renaming"
+    
+    it "should overwrite the dir at the new path if it exists" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.should_not exist :renamed
+      Fast::File.new.touch "demo/content.file"
+      Fast::File.new.touch "renamed/erase.me"
+      
+      Fast::Dir.new.move! :demo, :renamed
       Fast::File.new.should_not exist "renamed/erase.me"
       Fast::File.new.should exist "renamed/content.file"
       Fast::Dir.new.delete! :renamed
