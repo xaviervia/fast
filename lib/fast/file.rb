@@ -180,6 +180,8 @@ module Fast
       self.delete!
       return renamed      
     end
+    
+    alias :move :rename
 
     # Like #rename, but overwrites the new file if is exist
     def rename! *args
@@ -194,6 +196,8 @@ module Fast
       self.delete!
       return renamed      
     end
+    
+    alias :move! :rename!
     
     # Returns the path to the current file
     def path
