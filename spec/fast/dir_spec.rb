@@ -826,5 +826,4 @@ describe Fast::Dir do
       Fast::Dir.new.delete! :demo
     end
   end
-
 end
