@@ -1,3 +1,5 @@
+require "sub-setter/fast/dir"  # This call should be automated in the sub-setter API somehow
+
 module Fast
   # Directory handling class
   class Dir < Array
@@ -170,9 +172,9 @@ module Fast
       return "#{@path}"
     end
     
-    # Sends self to a DirFilter filter
+    # Sends self to a SubSetter for Fast::Dir
     def filter
-      DirFilter.new self
+      SubSetter::Fast::Dir.new self
     end
     
     alias :by :filter

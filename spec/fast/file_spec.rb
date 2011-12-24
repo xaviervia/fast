@@ -475,16 +475,10 @@ describe Fast::File do
   end
   
   shared_examples_for "any file subsetter" do
-    # This should follow more precisely the SubSetter pattern as specified
-    # on http://xaviervia.com.ar/patterns/sub-setter
-    #
-    # This is a reminder: along with Serializer, the Subsetter pattern
-    # (and later, the Sorting one) should be implemented Fast
-    #
-    # Fast::FileFilter will be deprecated soon
+    # SubSetter as described in http://xaviervia.com.ar/patterns/sub-setter
     it "should forward self to a filtering object" do      
       the_demo_file = Fast::File.new :demo
-      Fast::FileFilter.should_receive( :new ).with the_demo_file
+      SubSetter::Fast::File.should_receive( :new ).with the_demo_file
       the_demo_file.by
     end   
   end

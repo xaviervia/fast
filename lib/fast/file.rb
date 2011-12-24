@@ -1,3 +1,5 @@
+require "sub-setter/fast/file"  # This call should be automated in the sub-setter API somehow
+
 module Fast
   # File handling class.
   class File < String
@@ -150,9 +152,9 @@ module Fast
       return_list
     end
     
-    # Sends self to a FileFilter filter
+    # Sends self to a SubSetter for Fast::File
     def filter
-      FileFilter.new self
+      SubSetter::Fast::File.new self
     end
     
     alias :by :filter

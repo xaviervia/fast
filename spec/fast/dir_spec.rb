@@ -220,17 +220,13 @@ describe Fast::Dir do
   end
   
   shared_examples_for "any dir subsetter" do
-    # This is a reminder: along with Serializer, the Subsette pattern
-    # (and later, the Sorting one) should be implemented Fast
-    
-    # I guess filtering in Fast will be done in Fast::DirFilter
-    it "should forward self to a filtering object" do
+    it "should forward self to a subsetter object" do
       Fast::Dir.new.should_not exist "demo"
       Fast::File.new.touch "demo/in/subdir.file"
       
       the_demo_dir = Fast::Dir.new :demo
       
-      Fast::DirFilter.should_receive( :new ).with the_demo_dir
+      SubSetter::Fast::Dir.should_receive( :new ).with the_demo_dir
       
       the_demo_dir.by
       
