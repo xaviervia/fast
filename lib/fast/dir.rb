@@ -205,6 +205,8 @@ module Fast
       do_rename_to target
     end
    
+    alias :move :rename
+    
     # Renames this dir into the target path: overwrites the target dir 
     # if it exists
     def rename! *args
@@ -218,6 +220,8 @@ module Fast
       Dir.new.delete! target if Dir.new.exist? target
       do_rename_to target
     end
+    
+    alias :move! :rename!
     
     # Merges the target dir into this
     def merge *args
