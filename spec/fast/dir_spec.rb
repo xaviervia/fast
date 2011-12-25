@@ -765,6 +765,7 @@ describe Fast::Dir do
         Fast::File.new.touch "demo/file.txt"
         
         the_file = Fast::Dir.new(:demo)["file.txt"]
+        the_file.should be_a Fast::File
         the_file.path.should == "demo/file.txt"
       end
     end
@@ -777,7 +778,7 @@ describe Fast::Dir do
       end
     end
     
-    context "an integet is sent" do
+    context "an integer is sent" do
       it "should behave like an array" do
         Fast::File.new.touch "demo/file.txt"
         
@@ -817,9 +818,48 @@ describe Fast::Dir do
     end
     
     context "the content is a hash" do
-      it "should create the subdir"
+      it "should create the subdir" do
+        the_dir = Fast::Dir.new :demo
+        the_dir[:subdir] = {}
+        Fast::Dir.new.should exist "demo/subdir"
+      end
       
-      it "should create recursively the tree"
+      it "should create files for each key pointing to a String" do
+        the_dir = Fast::Dir.new :demo
+        the_dir[:subdir] = { 
+          "file.txt" => "The demo contents are awesome",
+          "other.data" => "10101010001100011" }
+        Fast::File.new.read( "demo/subdir/file.txt" ).should include "The demo contents are awesome"
+        Fast::File.new.read( "demo/subdir/other.data" ).should include "10101010001100011"
+      end
+      
+      it "should created directories for each key pointing to a Hash" do
+        the_dir = Fast::Dir.new :demo
+        the_dir[:subdir] = {
+          :subsub => {},
+          :data => {}
+        }
+        Fast::Dir.new.should exist "demo/subdir/subsub"
+        Fast::Dir.new.should exist "demo/subdir/data"
+      end
+      
+      it "should create recursively the tree" do
+        the_dir = Fast::Dir.new :demo
+        
+        the_dir[:subdir] = {
+          
+          :subsub       => {
+            :data       => {},
+            "other.txt" => "More than this" 
+          },
+          
+          "demo.txt"    => "Some file content" 
+        }
+          
+        Fast::Dir.new.should exist "demo/subdir/subsub/data"
+        Fast::File.new.read("demo/subdir/subsub/other.txt").should include "More than this"
+        Fast::File.new.read("demo/subdir/demo.txt").should include "Some file content"
+      end
     end
     
     after :each do 

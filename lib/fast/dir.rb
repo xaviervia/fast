@@ -280,7 +280,15 @@ module Fast
       if name.is_a? Integer # I do not wish to disable Array behaviour
         super 
       else
-        return File.new.write "#{@path}/#{name}", content       
+        if content.is_a? Hash
+          subdir = Dir.new.create! "#{@path}/#{name}"
+          content.each do |item_name, item_content|
+            subdir[item_name] = item_content
+          end
+          return subdir
+        else
+          return File.new.write "#{@path}/#{name}", content       
+        end
       end
     end
     
