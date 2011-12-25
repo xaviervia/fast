@@ -1,18 +1,58 @@
 = Fast
 
-DSL for file handling focused in intuitivity and semantics. 
+Tired of having a hard time working with files? Take a look at Fast...
 
-Library is pure Ruby 1.8.7, no FileUtils nor other dependencies (except Metafun for DSL delegation)
+  require "fast"
+  
+  lib_dir = dir! :lib
+  
+  lib_dir["demo.txt"] = "I love creating files from a Hash-like API"
+  
+  lib_dir.list  # => ['demo.txt']
+  
+  file! "lib/empty.txt"
+  
+  lib_dir.files.each do |path|
+    puts path
+  end # => demo.txt
+      #    empty.txt
+
+  lib_dir.destroy
+  
+  dir? :lib     # => false
+  
+...and wait a few weeks because this is not stable yet ;)
+
+Fast is a DSL for file and dir handling focused in intuitivity and semantics. Is pure Ruby (1.8.7+) with no dependencies, except for Metafun for the DSL.
 
 == Installation
 
   gem install fast
 
-Cucumber features still to do, but specs are stable (2011-12-11)
+== Usage
+
+Fast declares two sets of methods in its DSL:
+
+=== Dir methods
+
+  dir :lib                # The same as => Fast::Dir.new "lib"
+  dir.delete! "demo"      # The same as => Fast::Dir.new.delete! "demo"
+  
+  dir! :new_dir           # The same as => Fast::Dir.new.create! :new_dir
+  dir? :new_dir           # The same as => Fast::Dir.new.exist? :new_dir
+  
+=== File methods
+
+  file "demo.txt"         # The same as => Fast::File.new "demo.txt"
+  file.copy "demo.txt", "new.txt"  # The same as =>
+                          # Fast::File.new.copy "demo.txt", "new.txt"
+                          
+  file! "demo.txt"        # The same as => Fast::File.new.create! "demo.txt"
+  file? "demo.txt"        # The same as => Fast::File.new.exist? "demo.txt"
 
 == Philosophy
 
-<tt>Fast</tt> embraces the more straightforward view of files as strings of data and directories as arrays of files/directories. Some reasons:
+*Fast* embraces a more straightforward view of files as strings of data and directories as arrays of files/directories. Why?
 
 * It is more realistic in everyday usage
 * It makes them more object-like (and thus, more friendly to OOP)
@@ -22,8 +62,8 @@ Cucumber features still to do, but specs are stable (2011-12-11)
 <tt>Fast::Dir</tt> is a subclass of <tt>Array</tt>, usable as a hash, and <tt>Fast::File</tt> if a subclass of String.
 
 == Quick notes
+* Deliberate whether is a good idea to make Fast::Dir and Fast::File Multitons.
 * Read bytes as binary ASCII-8BIT always and then try to perform an heuristic conversion, if there is any reasonable way to do it. Otherwise, leave it to the user. Google: "ruby string encode utf-8 ascii" for some good readings.
-* Apply the SubSetter pattern for filtering instead of FileFilter and DirFilter ad described in http://xaviervia.com.ar/patterns/sub-setter
 * File lists as returned by Fast::Dir#list and Fast::Dir#dirs will be filtered after the list is retrieved by a set of filtering methods of the returned list, which should be an instance of Fast::Dir. 
 * An instance of Fast::Dir should be possible to be created from a Array.
 * The path can be setted indirectly by any method of Fast::File instances, and the same works for Dir. This is fine because allows for very quick calls, but once an instance gets a path setted it should be fixed and raise an exception in case some other method call is trying to change it.
@@ -35,6 +75,6 @@ Cucumber features still to do, but specs are stable (2011-12-11)
 
 == License
 
-GPL License. Why else?
+GPL License. Why other?
 
 @ Xavier Via
