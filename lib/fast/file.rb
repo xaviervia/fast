@@ -69,9 +69,10 @@ module Fast
       end
     end
   
-    alias :destroy :delete
-    alias :unlink :delete
-    alias :del :delete
+    alias :remove   :delete
+    alias :destroy  :delete
+    alias :del      :delete
+    alias :unlink   :delete
     
     # Deletes the file(s) if it exists, does nothing otherwise
     def delete! *args
@@ -87,6 +88,11 @@ module Fast
         @path
       end
     end
+    
+    alias :remove!  :delete!
+    alias :destroy! :delete!
+    alias :del!     :delete!
+    alias :unlink!  :delete!
     
     # Touches the file passed. Like bash `touch`, but creates
     # all required directories if they don't exist

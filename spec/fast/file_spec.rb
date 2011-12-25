@@ -182,17 +182,66 @@ describe Fast::File do
     before :each do @method = :unlink end
     it_behaves_like "any file deletion"
   end
+
+  describe "#unlink!" do
+    before :each do @method = :unlink! end
+    it_behaves_like "any file deletion" 
+    
+    it "should not fail if the file does not exist" do
+      Fast::File.new.should_not exist "the_file.txt"
+      expect { Fast::File.new.unlink! "the_file.txt"
+      }.to_not raise_error
+    end
+  end
   
   describe "#del" do 
     before :each do @method = :del end
     it_behaves_like "any file deletion" 
   end
   
+  describe "#del!" do
+    before :each do @method = :del! end
+    it_behaves_like "any file deletion" 
+    
+    it "should not fail if the file does not exist" do
+      Fast::File.new.should_not exist "the_file.txt"
+      expect { Fast::File.new.del! "the_file.txt"
+      }.to_not raise_error
+    end
+  end
+
   describe "#destroy" do 
     before :each do @method = :destroy end
     it_behaves_like "any file deletion"
   end
-  
+
+  describe "#destroy!" do
+    before :each do @method = :destroy! end
+    it_behaves_like "any file deletion" 
+    
+    it "should not fail if the file does not exist" do
+      Fast::File.new.should_not exist "the_file.txt"
+      expect { Fast::File.new.destroy! "the_file.txt"
+      }.to_not raise_error
+    end
+  end
+
+  describe "#remove" do 
+    before :each do @method = :remove end
+    it_behaves_like "any file deletion"
+  end
+
+  describe "#remove!" do
+    before :each do @method = :remove! end
+    it_behaves_like "any file deletion" 
+    
+    it "should not fail if the file does not exist" do
+      Fast::File.new.should_not exist "the_file.txt"
+      expect { Fast::File.new.remove! "the_file.txt"
+      }.to_not raise_error
+    end
+  end
+
   shared_examples_for "any file creation" do
     context "in current folder" do
       it "should create the file if it does not exist" do

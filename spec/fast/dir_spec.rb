@@ -320,6 +320,16 @@ describe Fast::Dir do
       }.to raise_error
     end
   end
+
+  describe "#del!" do
+    before :each do @method = :del! end
+    it_behaves_like "any dir deletion"
+    
+    it "should not fail even if the directory does not exist" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.del! :demo
+    end
+  end
   
   describe "#destroy" do 
     before :each do @method = :destroy end
@@ -328,6 +338,16 @@ describe Fast::Dir do
       ::File.should_not be_directory "demo"
       expect { Fast::Dir.new.send @method, "demo"
       }.to raise_error
+    end
+  end
+
+  describe "#destroy!" do
+    before :each do @method = :destroy! end
+    it_behaves_like "any dir deletion"
+    
+    it "should not fail even if the directory does not exist" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.destroy! :demo
     end
   end
   
@@ -342,6 +362,16 @@ describe Fast::Dir do
     end
   end
   
+  describe "#unlink!" do
+    before :each do @method = :delete! end
+    it_behaves_like "any dir deletion"
+    
+    it "should not fail even if the directory does not exist" do
+      Fast::Dir.new.should_not exist :demo
+      Fast::Dir.new.unlink! :demo
+    end
+  end
+
   describe "#remove" do
     before :each do @method = :remove end
     it_behaves_like "any dir deletion" 

@@ -92,10 +92,10 @@ module Fast
       end
     end
   
-    alias :destroy :delete
-    alias :del :delete
-    alias :unlink :delete
-    alias :remove :delete
+    alias :remove   :delete
+    alias :destroy  :delete
+    alias :del      :delete
+    alias :unlink   :delete
     
     # Like #delete, but raises no error if some directory is missing
     def delete! *args
@@ -118,7 +118,10 @@ module Fast
       end
     end
     
-    alias :remove! :delete!
+    alias :remove!  :delete!
+    alias :destroy! :delete!
+    alias :del!     :delete!
+    alias :unlink!  :delete!
     
     # Checks for existence. True if the directory exists, false otherwise
     def exist? path = nil
