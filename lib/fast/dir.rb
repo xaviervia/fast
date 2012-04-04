@@ -11,6 +11,7 @@ module Fast
     # Returns a Fast::Dir list with all items in the directory, except ".." and "."
     def list path = nil, &block
       @path = normalize path unless path.nil?
+      self.clear unless self.empty?
       ::Dir.foreach @path do |entry|
         unless entry == "." or entry == ".."
           self << entry 
@@ -24,6 +25,7 @@ module Fast
     # (at least yet)
     def files path = nil, &block
       @path = normalize path if path
+      self.clear unless self.empty?
       ::Dir.foreach @path do |entry|
         unless ::File.directory? "#{@path}/#{entry}"
           self << entry 
@@ -37,6 +39,7 @@ module Fast
     # and excluding points
     def dirs path = nil, &block
       @path = normalize path if path
+      self.clear unless self.empty?
       ::Dir.foreach @path do |entry|
         if ::File.directory? "#{@path}/#{entry}" and entry != "." and entry != ".."
           self << entry 

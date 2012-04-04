@@ -83,7 +83,44 @@ describe Fast::Dir do
     end
 
     context "the method is called in an instance of Fast::Dir" do
-      it "should return the files only"
+      it "should return the files only" do
+        ::File.should_not be_directory "demo"
+        Fast::File.new.touch "demo/alice.txt"
+        Fast::File.new.touch "demo/betty.txt"
+        Fast::File.new.touch "demo/chris.txt"
+        Fast::Dir.new.create! "demo/subdir"
+        
+        the_dir = Fast::Dir.new :demo
+        the_dir.files.should include "alice.txt"
+        the_dir.files.should include "betty.txt"
+        the_dir.files.should include "chris.txt"
+        the_dir.files.should_not include "subdir"
+        the_dir.files.should_not include ".."
+        the_dir.files.should_not include "."
+        
+        Fast::Dir.new.delete! :demo
+      end
+    end
+    
+    context "the method is called after #list has been called on this instance" do
+      it "should return the files only" do
+        ::File.should_not be_directory "demo"
+        Fast::File.new.touch "demo/alice.txt"
+        Fast::File.new.touch "demo/betty.txt"
+        Fast::File.new.touch "demo/chris.txt"
+        Fast::Dir.new.create! "demo/subdir"
+        
+        the_dir = Fast::Dir.new :demo
+        the_dir.list
+        the_dir.files.should include "alice.txt"
+        the_dir.files.should include "betty.txt"
+        the_dir.files.should include "chris.txt"
+        the_dir.files.should_not include "subdir"
+        the_dir.files.should_not include ".."
+        the_dir.files.should_not include "."
+        
+        Fast::Dir.new.delete! :demo
+      end
     end
   end
   
@@ -117,7 +154,44 @@ describe Fast::Dir do
     end
 
     context "the method is called in an instance of Fast::Dir" do
-      it "should return the dirs only"
+      it "should return the dirs only" do
+        ::File.should_not be_directory "demo"
+        Fast::File.new.touch "demo/alice.txt"
+        Fast::File.new.touch "demo/betty.txt"
+        Fast::File.new.touch "demo/chris.txt"
+        Fast::Dir.new.create! "demo/subdir"
+        
+        the_dir = Fast::Dir.new :demo
+        the_dir.dirs.should_not include "alice.txt"
+        the_dir.dirs.should_not include "betty.txt"
+        the_dir.dirs.should_not include "chris.txt"
+        the_dir.dirs.should include "subdir"
+        the_dir.dirs.should_not include ".."
+        the_dir.dirs.should_not include "."
+        
+        Fast::Dir.new.delete! :demo
+      end
+    end
+
+    context "the method is called after #list has been called on this instance" do
+      it "should return the dirs only" do
+::File.should_not be_directory "demo"
+        Fast::File.new.touch "demo/alice.txt"
+        Fast::File.new.touch "demo/betty.txt"
+        Fast::File.new.touch "demo/chris.txt"
+        Fast::Dir.new.create! "demo/subdir"
+        
+        the_dir = Fast::Dir.new :demo
+        the_dir.list
+        the_dir.dirs.should_not include "alice.txt"
+        the_dir.dirs.should_not include "betty.txt"
+        the_dir.dirs.should_not include "chris.txt"
+        the_dir.dirs.should include "subdir"
+        the_dir.dirs.should_not include ".."
+        the_dir.dirs.should_not include "."
+        
+        Fast::Dir.new.delete! :demo
+      end
     end
   end
   
