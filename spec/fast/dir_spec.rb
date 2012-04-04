@@ -81,6 +81,10 @@ describe Fast::Dir do
       ::File.unlink "demo/alice.txt"
       ::Dir.unlink "demo"
     end
+
+    context "the method is called in an instance of Fast::Dir" do
+      it "should return the files only"
+    end
   end
   
   describe "#dirs" do
@@ -110,6 +114,10 @@ describe Fast::Dir do
       ::File.unlink "demo/betty.txt"
       ::File.unlink "demo/alice.txt"
       ::Dir.unlink "demo"
+    end
+
+    context "the method is called in an instance of Fast::Dir" do
+      it "should return the dirs only"
     end
   end
   
