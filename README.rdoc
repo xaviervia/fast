@@ -10,9 +10,9 @@ Tired of having a hard time working with files? Take a look at Fast...
   
   lib_dir.list  # => ['demo.txt']
   
-  file! "lib/empty.txt"
+  file! "lib/empty.txt" # New file lib/empty.txt
   
-  lib_dir.files.each do |path|
+  lib_dir.files do |path|
     puts path
   end # => demo.txt
       #    empty.txt
@@ -52,22 +52,33 @@ Fast declares two sets of methods in its DSL:
 
 == Philosophy
 
-*Fast* embraces a more straightforward view of files as strings of data and directories as arrays of files/directories. Why?
+*Fast* embraces the more straightforward view of files as strings of data and directories as arrays of files/directories. Why?
 
 * It is more realistic in everyday usage
 * It makes them more object-like (and thus, more friendly to OOP)
-* Is more semantic
+* It is more semantic
 * Files as IOs are still accessible through the harder-to-use native Ruby API
 
 <tt>Fast::Dir</tt> is a subclass of <tt>Array</tt>, usable as a hash, and <tt>Fast::File</tt> if a subclass of String.
 
 == Quick notes
-* URGENT: Make fast depend of the last version of <tt>metafun</tt>
-* Deliberate whether is a good idea to make Fast::Dir and Fast::File Multitons.
-* Read bytes as binary ASCII-8BIT always and then try to perform an heuristic conversion, if there is any reasonable way to do it. Otherwise, leave it to the user. Google: "ruby string encode utf-8 ascii" for some good readings.
-* File lists as returned by Fast::Dir#list and Fast::Dir#dirs will be filtered after the list is retrieved by a set of filtering methods of the returned list, which should be an instance of Fast::Dir. 
-* An instance of Fast::Dir should be possible to be created from a Array.
+
+* Remember to develop the SubSetter pattern in its own gem.
+
+* Rename FilesystemObject: Item, CommonMethods, AbstractFile, FastHelpers (think)
+* Add NotImplementedException in FilesystemObject's implementation of #exist? #exist_all? #exist_any? #exist_which if called in a class that does not implement (private) #do_check_existence
+* Deliberate whether is a good idea to make Fast::Dir and Fast::File Multitons. (May be when an absolute path is used)
 * The path can be setted indirectly by any method of Fast::File instances, and the same works for Dir. This is fine because allows for very quick calls, but once an instance gets a path setted it should be fixed and raise an exception in case some other method call is trying to change it.
+
+=== Fast::File
+* Read bytes as binary ASCII-8BIT always and then try to perform an heuristic conversion, if there is any reasonable way to do it. Otherwise, leave it to the user. Google: "ruby string encode utf-8 ascii" for some good readings.
+
+=== Fast::Dir
+* Change the behaviour in the calls to #dirs and #files: return a new instance, with no @path setted.
+* Change the behaviour in the initialization: call list always if there's a path an the path matches an existing directory
+* Allow for easy recursive calls (#list_all, #files_all, #dirs_all for example)
+* Deliberate whether "#<<" should be kept in Fast::Dir and if it should be use as alias for merge
+* An instance of Fast::Dir should be possible to be created from a Array. (pity I didn't specified an usage case) 
 
 == Remote future
 * Make Fast a REST client (well, use <tt>rest-client</tt>) in order to transparently use files and directories from a compliant REST server. 

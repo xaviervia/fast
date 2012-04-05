@@ -298,6 +298,37 @@ module Fast
         end
       end
     end
+
+    # Checks the given dirs should be merged if any conflict would arise.
+    #
+    # Returns true if any file in the target directory has the same 
+    # path (ie: the same name and subdirectory structure) as other file
+    # in the source directory.
+    def conflicts_with? *args
+      if args.length > 1
+        current, target = *args
+        @path = normalize current
+        target = Dir.new target
+      else
+        target = Dir.new args.first
+      end
+      
+      files do |file|
+        target.files do |target_file|
+          return true if file == target_file
+        end
+      end
+      
+      dirs do |dir|
+        target.dirs do |target_dir|
+          if dir == target_dir
+            return true if Fast::Dir.new.conflicts_with? "#{@path}/#{dir}", "#{target.path}/#{target_dir}" 
+          end
+        end
+      end
+      
+      false
+    end
     
     private
       def do_delete path = nil

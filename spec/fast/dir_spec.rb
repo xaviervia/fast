@@ -262,6 +262,58 @@ describe Fast::Dir do
       Fast::Dir.new.delete! :alt
       Fast::Dir.new.delete! :other
     end
+    
+    context "no path is setted and a Hash is passed" do
+      it "build the entire structure in the current dir" do
+        Fast::Dir.new.should_not exist :demo
+        Fast::Dir.new.should_not exist :demo2
+        
+        Fast::Dir.new.send @method, { 
+          :demo => {
+            :Superfile => "With some content",
+            :subdir => {
+              "deep.txt" => "In the structure."
+            }
+          },
+          :demo2 => {}
+        }
+        
+        Fast::File.new.read("demo/Superfile").should == "With some content"
+        Fast::File.new.read("demo/subdir/deep.txt").should == "In the structure."
+        
+        Fast::Dir.new.should exist :demo2
+      end
+    
+      after do
+        Fast::Dir.new.delete! :demo
+        Fast::Dir.new.delete! :demo2
+      end
+    end
+
+    context "a path is setted in the Dir and a Hash is passed" do
+      it "build the entire structure in the right dir" do
+        Fast::Dir.new.should_not exist :demo
+        
+        Fast::Dir.new("demo").send @method, { 
+          :inner => {
+            :Superfile => "With some content",
+            :subdir => {
+              "deep.txt" => "In the structure."
+            }
+          },
+          :meta => {}
+        }
+        
+        Fast::File.new.read("demo/inner/Superfile").should == "With some content"
+        Fast::File.new.read("demo/inner/subdir/deep.txt").should == "In the structure."
+        
+        Fast::Dir.new.should exist "demo/meta"
+      end
+    
+      after do
+        Fast::Dir.new.delete! :demo
+      end
+    end
   end
   
   describe "#create" do
@@ -470,6 +522,7 @@ describe Fast::Dir do
   
   shared_examples_for "any dir existencialism" do
     it "should return true if the dir exists" do
+      pending "move partially to FilesystemObject"
       ::File.should_not be_directory "demo"
       Fast::Dir.new.create! "demo"
       Fast::Dir.new.send( @method, "demo" ).should be_true
@@ -477,6 +530,7 @@ describe Fast::Dir do
     end
     
     it "should return false if the dir does not exist" do
+      pending "move partially to FilesystemObject"
       ::File.should_not be_directory "demo"
       Fast::Dir.new.send( @method, "demo" ).should be_false
     end
@@ -583,12 +637,14 @@ describe Fast::Dir do
   shared_examples_for "any dir absolutizer" do
     context "dir path is a relative route" do
       it "should expand the dir path with the pwd" do
+        pending "move to FilesystemObject"
         Fast::Dir.new.send( @method, :demo ).should == "#{Dir.pwd}/demo"
       end
     end
     
     context "dir path is an absolute route" do
       it "should return the same path as given" do
+        pending "move to FilesystemObject"
         unless OS.windows?
           Fast::Dir.new.send( @method, "/dev/null").should == "/dev/null"
         else
@@ -834,13 +890,68 @@ describe Fast::Dir do
     it "should behave like #merge but never fail"
   end
 
-  describe "#conflicts?" do
-    context "both dirs exist and no file or dir in any has the same name in the other" do
-      it "should return true"
+  describe "#conflicts_with?" do
+    context "no directory tree" do
+      context "no file in target has the same name as other in source" do
+        it "should return false" do
+          Fast::Dir.new.should_not exist :target
+          Fast::Dir.new.should_not exist :demo
+          
+          Fast::File.new.touch "demo/non_conflict.txt"
+          Fast::File.new.touch "target/not_at_all.txt"
+          
+          Fast::Dir.new.conflicts_with?(:demo, :target).should === false
+        end
+      end
+      
+      context "at least one file in target has the same name as other in source" do
+        it "should return true" do
+          Fast::Dir.new.should_not exist :target
+          Fast::Dir.new.should_not exist :demo
+          
+          Fast::File.new.touch "demo/some_conflict.txt"
+          Fast::File.new.touch "target/some_conflict.txt"
+          Fast::File.new.touch "target/not_at_all.txt"
+          
+          Fast::Dir.new.conflicts_with?(:demo, :target).should === true
+        end
+      end
     end
-    
-    context "some files in target dir have the same name as other in source" do
-      it "should return false"
+
+    context "recursive" do
+      context "no file in any has the same path in the other" do
+        it "should return false" do
+          Fast::Dir.new.should_not exist :demo
+          Fast::Dir.new.should_not exist :target
+          
+          Fast::File.new.touch "demo/some/file.txt"
+          Fast::File.new.touch "demo/deep/in/the/tree.file"
+          
+          Fast::File.new.touch "target/no/conflict.what"
+          Fast::File.new.touch "target/so/ever.txt"
+          
+          Fast::Dir.new.conflicts_with?(:demo, :target).should === false
+        end      
+      end
+      
+      context "at least one file in target dir have the same path as other in source" do
+        it "should return true" do
+          Fast::Dir.new.should_not exist :demo
+          Fast::Dir.new.should_not exist :target
+          
+          Fast::File.new.touch "demo/some/file.txt"
+          Fast::File.new.touch "demo/deep/in/the/tree.file"
+          
+          Fast::File.new.touch "target/some/file.txt"
+          Fast::File.new.touch "target/so/ever.txt"
+          
+          Fast::Dir.new.conflicts_with?(:demo, :target).should === true
+        end
+      end
+    end
+
+    after do
+      Fast::Dir.new.remove! :demo, :target
     end
   end
   

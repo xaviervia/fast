@@ -404,6 +404,7 @@ describe Fast::File do
   
   shared_examples_for "any file existencialism" do
     it "should return true if file exists" do
+      pending "move partially to FilesystemObject"
       ::File.should_not exist "demo.file"
       Fast::File.new.create! "demo.file"
       Fast::File.new.send( @method, "demo.file" ).should be_true
@@ -411,11 +412,13 @@ describe Fast::File do
     end
     
     it "should return false if file does not exist" do
+      pending "move partially to FilesystemObject"
       ::File.should_not exist "demo.file"
       Fast::File.new.send( @method, "demo.file" ).should be_false
     end
     
     it "should return false if path represents a directory!" do
+      pending "move partially to FilesystemObject"
       Fast::Dir.new.should_not exist "demo"
       Fast::Dir.new.create "demo"
       Fast::File.new.send( @method, "demo" ).should be_false
@@ -560,12 +563,14 @@ describe Fast::File do
   shared_examples_for "any file absolutizer" do
     context "file path is a relative route" do
       it "should expand the file path with pwd" do
+        pending "move to FilesystemObject"
         Fast::File.new.send( @method, "demo.file" ).should == "#{Dir.pwd}/demo.file"
       end
     end
     
     context "file path is an absolute route" do
       it "should return the same as given path" do
+        pending "move to FilesystemObject"
         unless OS.windows?
           Fast::File.new.send( @method, "/dev/null" ).should == "/dev/null"
         else
