@@ -74,6 +74,7 @@ Fast declares two sets of methods in its DSL:
 * Read bytes as binary ASCII-8BIT always and then try to perform an heuristic conversion, if there is any reasonable way to do it. Otherwise, leave it to the user. Google: "ruby string encode utf-8 ascii" for some good readings.
 
 === Fast::Dir
+* Calls to #dirs and #files should delegate to a SubSetter
 * Change the behaviour in the calls to #dirs and #files: return a new instance, with no @path setted.
 * Change the behaviour in the initialization: call list always if there's a path an the path matches an existing directory
 * Allow for easy recursive calls (#list_all, #files_all, #dirs_all for example)

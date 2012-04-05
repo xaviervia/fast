@@ -175,14 +175,6 @@ module Fast
     end
     
     alias :by :filter
-    
-    # Expands the path if it's a relative path
-    def expand path = nil
-      @path = normalize path if path
-      ::File.expand_path @path
-    end
-    
-    alias :absolute :expand
         
     # Renames the file (by Fast::File own means, it does not call 
     # the underlying OS). Fails if the new path is an existent file

@@ -633,36 +633,6 @@ describe Fast::Dir do
       Fast::Dir.new(:demo).to_s.should include "demo"
     end
   end
-
-  shared_examples_for "any dir absolutizer" do
-    context "dir path is a relative route" do
-      it "should expand the dir path with the pwd" do
-        pending "move to FilesystemObject"
-        Fast::Dir.new.send( @method, :demo ).should == "#{Dir.pwd}/demo"
-      end
-    end
-    
-    context "dir path is an absolute route" do
-      it "should return the same path as given" do
-        pending "move to FilesystemObject"
-        unless OS.windows?
-          Fast::Dir.new.send( @method, "/dev/null").should == "/dev/null"
-        else
-          pending "POSIX only!"
-        end
-      end
-    end
-  end
-
-  describe "#expand" do
-    before :each do @method = :expand end
-    it_behaves_like "any dir absolutizer"
-  end
-  
-  describe "#absolute" do
-    before :each do @method = :absolute end
-    it_behaves_like "any dir absolutizer"
-  end
   
   shared_examples_for "any dir renaming" do
     it "should delete current dir and target dir should exist" do

@@ -1,6 +1,7 @@
 require "fast/filesystemobject"
 require "fast/file"
 require "fast/dir"
+require "fast/exceptions"
 
 module Fast
   # Returns a Dir with the file list already called (if a path is provided)

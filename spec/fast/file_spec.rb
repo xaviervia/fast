@@ -560,36 +560,6 @@ describe Fast::File do
     end
   end  
 
-  shared_examples_for "any file absolutizer" do
-    context "file path is a relative route" do
-      it "should expand the file path with pwd" do
-        pending "move to FilesystemObject"
-        Fast::File.new.send( @method, "demo.file" ).should == "#{Dir.pwd}/demo.file"
-      end
-    end
-    
-    context "file path is an absolute route" do
-      it "should return the same as given path" do
-        pending "move to FilesystemObject"
-        unless OS.windows?
-          Fast::File.new.send( @method, "/dev/null" ).should == "/dev/null"
-        else
-          pending "POSIX only!"
-        end
-      end
-    end
-  end
-  
-  describe "#expand" do
-    before :each do @method = :expand end
-    it_behaves_like "any file absolutizer"
-  end
-  
-  describe "#absolute" do
-    before :each do @method = :absolute end
-    it_behaves_like "any file absolutizer"
-  end
-
   shared_examples_for "any file renaming" do
     it "should change the file's name" do
       Fast::File.new.should_not exist "demo.file"

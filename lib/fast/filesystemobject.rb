@@ -16,5 +16,14 @@ module Fast
     def path
       @path
     end
+    
+    # Expands the path if it's a relative path
+    def expand path = nil
+      @path = normalize path if path
+      raise Fast::PathNotSettedException, "The path was not setted in this instance" unless @path
+      ::File.expand_path @path
+    end
+    
+    alias :absolute :expand
   end
 end
