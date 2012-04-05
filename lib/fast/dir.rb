@@ -2,7 +2,13 @@ require "sub-setter/fast/dir"  # This call should be automated in the sub-setter
 
 module Fast
   # Directory handling class
+  #
+  # Inherits from Array in order to be usable as a Array
+  # Includes the module Fast::FilesystemObject for common
+  # functionality with Fast::File
   class Dir < Array
+    include FilesystemObject
+  
     def initialize path = nil
       super()
       @path = normalize path if path
@@ -192,11 +198,6 @@ module Fast
     end
     
     alias :absolute :expand
-        
-    # Returns the path to the dir, if defined
-    def path
-      @path if @path
-    end    
     
     # Renames this dir into the target path, unless the target path 
     # points to an existing dir.
@@ -344,10 +345,6 @@ module Fast
         self.delete!
         
         target_dir
-      end
-      
-      def normalize path
-        "#{path}"
       end
   end
 end

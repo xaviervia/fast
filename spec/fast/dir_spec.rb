@@ -2,13 +2,6 @@ require "fast"
 require "zucker/os"
 
 describe Fast::Dir do
-
-  context "a Fast::Dir is passed as argument where a path is accepted" do
-    it "should be accepted"
-    
-    it "should I really think of a common denominator of Fast::Dir and Fast::File?"
-  end
-  
   shared_examples_for "any dir list" do 
     context "a block is passed as an argument" do
       it "should pass each entry as argument to the block" do
@@ -613,22 +606,6 @@ describe Fast::Dir do
   describe "#absolute" do
     before :each do @method = :absolute end
     it_behaves_like "any dir absolutizer"
-  end
-  
-  describe "#path" do
-    context "the path is setted" do
-      it "should return the path" do
-        the_dir = Fast::Dir.new "demo"
-        the_dir.path.should == "demo"
-      end
-    end
-    
-    context "the path is undefined" do
-      it "should return nil" do
-        the_dir = Fast::Dir.new 
-        the_dir.path.should be_nil
-      end
-    end
   end
   
   shared_examples_for "any dir renaming" do

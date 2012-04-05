@@ -1,3 +1,4 @@
+require "fast/filesystemobject"
 require "fast/file"
 require "fast/dir"
 

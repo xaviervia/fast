@@ -2,7 +2,12 @@ require "sub-setter/fast/file"  # This call should be automated in the sub-sette
 
 module Fast
   # File handling class.
+  #
+  # Inherits from String in order to be usable as a String
+  # Includes the module Fast::FilesystemObject for common
+  # functionality with Fast::Dir
   class File < String
+    include FilesystemObject
   
     # Initializes the file
     def initialize source = nil
@@ -112,9 +117,15 @@ module Fast
     alias :create! :touch
     
     # Returns the contents of the file, all at once
-    def read path = nil
+    def read path = nil, &block
       @path = normalize path if path
-      ::File.read @path
+      unless block
+        ::File.read @path
+      else
+        ::File.open @path, "r" do |the_file|
+          block.call the_file
+        end
+      end
     end
 
     # Returns true if file exists, false otherwise
@@ -206,12 +217,7 @@ module Fast
     end
     
     alias :move! :rename!
-    
-    # Returns the path to the current file
-    def path
-      @path if @path
-    end
-    
+        
     # Appends the contents of the target file into self and erase the target
     def merge *args
       if args.length > 1
@@ -263,11 +269,7 @@ module Fast
       do_copy target
     end
     
-    private
-      def normalize path
-        "#{path}"
-      end
-      
+    private      
       def do_copy target
         target.write read
         target

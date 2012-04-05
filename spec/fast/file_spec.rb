@@ -5,11 +5,6 @@ require "zucker/os"
 ::File.unlink "demo.txt" if ::File.exist? "demo.txt"
 
 describe Fast::File do
-
-  context "a Fast::File is passed as argument where a path is accepted" do
-    it "should be accepted"
-  end
-
   shared_examples_for "any file content appending" do
     it "should create the file if it does not exist" do
       ::File.should_not exist "demo.txt"
@@ -384,7 +379,17 @@ describe Fast::File do
       end
       
       context "a block is passed" do
-        it "should have direct access to file's methods"
+        it "should have direct access to file's methods" do
+          Fast::File.new.should_not exist :demo_txt
+          Fast::File.new.append :demo_txt, "New content!"
+          entered_the_block = false
+          Fast::File.new.read :demo_txt do |the_file|
+            the_file.should be_a ::File
+            entered_the_block = true
+          end
+          entered_the_block.should be_true
+          Fast::File.new.destroy! :demo_txt
+        end
       end
     end
     
@@ -578,22 +583,6 @@ describe Fast::File do
   describe "#absolute" do
     before :each do @method = :absolute end
     it_behaves_like "any file absolutizer"
-  end
- 
-  describe "#path" do 
-    context "the path is setted" do
-      it "returns the path" do
-        the_file = Fast::File.new "demo.file"
-        the_file.path.should == "demo.file"
-      end
-    end
-    
-    context "the path is undefined" do
-      it "returns nil" do
-        the_file = Fast::File.new
-        the_file.path.should be_nil
-      end
-    end
   end
 
   shared_examples_for "any file renaming" do
