@@ -25,5 +25,45 @@ module Fast
     end
     
     alias :absolute :expand
+  
+    # Returns true if the item exists, false otherwise: 
+    # relays on the implementation of a private #do_check?
+    # method in the class that includes the module
+    def exist? path = nil
+      if path
+        path = normalize path
+        @path = path unless @path
+        do_exist? path
+      else
+        raise ArgumentError, "An argument should be provided if this instance has no path setted" unless @path
+        do_exist? @path
+      end
+    end
+    
+    alias :exists? :exist?
+    
+    def exist_all? *args
+      unless args.empty?
+      else
+        raise ArgumentError, "An argument should be provided if this instance has no path setted" unless @path
+        do_exist? @path
+      end
+    end
+    
+    def exist_any? *args
+      unless args.empty?
+      else
+        raise ArgumentError, "An argument should be provided if this instance has no path setted" unless @path
+        do_exist? @path
+      end
+    end
+    
+    private
+    
+    # Abstract implementation to be overriden in the 
+    # actual classes.
+    def do_exist? path
+      raise NotImplementedError, "The implementation of #do_exist? in the module FilesystemObject is abstract, please reimplement in any class including it."
+    end
   end
 end
