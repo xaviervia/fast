@@ -328,6 +328,8 @@ describe Fast::Dir do
       Fast::Dir.new.delete! :demo
     end
     
+    it "should fail is a Hash is passed an there are conflicts"
+    
     after do
       Fast::Dir.new.delete! :demo
     end
@@ -344,6 +346,8 @@ describe Fast::Dir do
       }.to_not raise_error ArgumentError, "Dir 'demo' already exists"
       Fast::Dir.new.delete! :demo
     end
+    
+    it "should override if a Hash is passed and there are conflicts"
   end
   
   shared_examples_for "any dir deletion" do    
@@ -1004,6 +1008,8 @@ describe Fast::Dir do
         Fast::File.new.read("demo/subdir/subsub/other.txt").should include "More than this"
         Fast::File.new.read("demo/subdir/demo.txt").should include "Some file content"
       end
+      
+      it "should handle conflicts somehow"
     end
     
     after :each do 

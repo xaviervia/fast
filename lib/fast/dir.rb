@@ -61,8 +61,20 @@ module Fast
       if args.length > 0
         return_me = nil
         args.each do |path|
-          raise ArgumentError, "Dir '#{path}' already exists" if Dir.new.exist? path
-          return_me = do_create path
+          unless path.is_a? Hash
+            raise ArgumentError, "Dir '#{path}' already exists" if Dir.new.exist? path
+            return_me = do_create path
+          else
+            if @path
+              subdir = Dir.new.create! "#{@path}"
+            else
+              subdir = Dir.new "."
+            end
+            path.each do |item_name, item_content|
+              subdir[item_name] = item_content
+            end
+            return subdir          
+          end
         end
         return return_me
       else
@@ -78,7 +90,19 @@ module Fast
       if args.length > 0
         return_me = nil
         args.each do |path|
-          return_me = do_create path
+          unless path.is_a? Hash
+            return_me = do_create path
+          else
+            if @path
+              subdir = Dir.new.create! "#{@path}"
+            else
+              subdir = Dir.new "."
+            end
+            path.each do |item_name, item_content|
+              subdir[item_name] = item_content
+            end
+            return subdir          
+          end
         end
         return return_me
       else
