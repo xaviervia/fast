@@ -1,4 +1,5 @@
 require "metafun/delegator"
+require "sub-setter"
 
 require "fast/fast"
 

@@ -168,13 +168,6 @@ module Fast
       end
       return_list
     end
-    
-    # Sends self to a SubSetter for Fast::File
-    def filter
-      SubSetter::Fast::File.new self
-    end
-    
-    alias :by :filter
         
     # Renames the file (by Fast::File own means, it does not call 
     # the underlying OS). Fails if the new path is an existent file

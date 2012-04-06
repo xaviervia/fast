@@ -15,6 +15,14 @@ module SubSetter
         return_me
       end
       
+      def ending the_ending
+        return_me = ::Fast::Dir.new
+        @set.each do |entry|
+          return_me << entry if entry.end_with? the_ending
+        end
+        return_me
+      end
+      
       def strip_extension
         return_me = ::Fast::Dir.new
         @set.each do |entry|

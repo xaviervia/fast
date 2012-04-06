@@ -183,14 +183,7 @@ module Fast
     def to_s
       return "#{@path}"
     end
-    
-    # Sends self to a SubSetter for Fast::Dir
-    def filter
-      SubSetter::Fast::Dir.new self
-    end
-    
-    alias :by :filter
-    
+
     # Renames this dir into the target path, unless the target path 
     # points to an existing dir.
     def rename *args

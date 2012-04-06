@@ -346,32 +346,6 @@ describe Fast::Dir do
     end
   end
   
-  shared_examples_for "any dir subsetter" do
-    it "should forward self to a subsetter object" do
-      Fast::Dir.new.should_not exist "demo"
-      Fast::File.new.touch "demo/in/subdir.file"
-      
-      the_demo_dir = Fast::Dir.new :demo
-      
-      SubSetter::Fast::Dir.should_receive( :new ).with the_demo_dir
-      
-      the_demo_dir.by
-      
-      the_demo_dir.delete!
-    end   
-  end
-
-  describe "#by" do 
-    before :each do @method = :by end
-    it_behaves_like "any dir subsetter"
-  end
-  
-  describe "#filter" do
-    before :each do @method = :filter end
-    it_behaves_like "any dir subsetter"
-  end
-
-  
   shared_examples_for "any dir deletion" do    
     it "should delete the directory if it exists" do
       ::File.should_not be_directory "demo"

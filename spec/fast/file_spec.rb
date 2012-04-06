@@ -530,25 +530,6 @@ describe Fast::File do
       Fast::File.new.delete! "demo.txt"
     end
   end
-  
-  shared_examples_for "any file subsetter" do
-    # SubSetter as described in http://xaviervia.com.ar/patterns/sub-setter
-    it "should forward self to a filtering object" do      
-      the_demo_file = Fast::File.new :demo
-      SubSetter::Fast::File.should_receive( :new ).with the_demo_file
-      the_demo_file.by
-    end   
-  end
-  
-  describe "#by" do 
-    before :each do @method = :by end
-    it_behaves_like "any file subsetter"
-  end
-  
-  describe "#filter" do
-    before :each do @method = :filter end
-    it_behaves_like "any file subsetter"
-  end
 
   describe ".new" do
     it "should accept a string path as argument" do
