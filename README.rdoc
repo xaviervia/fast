@@ -6,9 +6,9 @@ Tired of having a hard time working with files? Take a look at Fast...
 
   require "fast"
   
-  lib_dir = dir! :lib
+  lib_dir = dir! :lib # Creates a new dir "lib"
   
-  lib_dir["demo.txt"] = "I love creating files from a Hash-like API"
+  lib_dir["demo.txt"] = "I love creating files from a Hash-like API"  # Creates lib/demo.txt containing the text
   
   lib_dir.list  # => ['demo.txt']
   
@@ -22,10 +22,10 @@ Tired of having a hard time working with files? Take a look at Fast...
   lib_dir.destroy
   
   dir? :lib     # => false
-  
-...and wait a few weeks because this is not stable yet ;)
 
-Fast is a DSL for file and dir handling focused in intuitivity and semantics. Is pure Ruby (1.8.7+) with no dependencies, except for Metafun for the DSL.
+...and finally is ''quite stable'' so you can use it if you wish so.
+
+Fast is a DSL for file and dir handling focused in intuitivity and semantics. Fast is pure Ruby, don't relays on OS functions, so is a little slower but more portable.
 
 == Installation
 
@@ -67,9 +67,8 @@ Fast declares two sets of methods in its DSL:
 
 * Remember to develop the SubSetter pattern in its own gem.
 
-* Rename FilesystemObject: Item, CommonMethods, AbstractFile, FastHelpers (think)
-* Add NotImplementedException in FilesystemObject's implementation of #exist? #exist_all? #exist_any? #exist_which if called in a class that does not implement (private) #do_check_existence
-* Deliberate whether is a good idea to make Fast::Dir and Fast::File Multitons. (May be when an absolute path is used)
+* Rename FilesystemObject: Item, CommonMethods, AbstractFile, FastHelpers (think!)
+* Deliberate whether is a good idea to make Fast::Dir and Fast::File Multitons. (May be only when an absolute path is used)
 * The path can be setted indirectly by any method of Fast::File instances, and the same works for Dir. This is fine because allows for very quick calls, but once an instance gets a path setted it should be fixed and raise an exception in case some other method call is trying to change it.
 
 === Fast::File
