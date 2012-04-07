@@ -8,7 +8,8 @@ Tired of having a hard time working with files? Take a look at Fast...
   
   lib_dir = dir! :lib # Creates a new dir "lib"
   
-  lib_dir["demo.txt"] = "I love creating files from a Hash-like API"  # Creates lib/demo.txt containing the text
+  lib_dir["demo.txt"] = "I love creating files from a Hash-like API"  
+    # Creates lib/demo.txt containing the text
   
   lib_dir.list  # => ['demo.txt']
   
@@ -23,7 +24,7 @@ Tired of having a hard time working with files? Take a look at Fast...
   
   dir? :lib     # => false
 
-...and finally is ''quite stable'' so you can use it if you wish so.
+...and finally is ((*quite stable*)) so you can use it if you wish so.
 
 Fast is a DSL for file and dir handling focused in intuitivity and semantics. Fast is pure Ruby, don't relays on OS functions, so is a little slower but more portable.
 
