@@ -1,4 +1,4 @@
-= Fast
+= Fast [![Build Status](https://secure.travis-ci.org/xaviervia/fast.png?branch=master)](http://travis-ci.org/xaviervia/fast)
 
 Tired of having a hard time working with files? Take a look at Fast...
 
