@@ -88,10 +88,8 @@ This is also the recommended form when using Fast in the context of a library.
 [pry-gem]: https://github.com/pry/pry
 [rake-gem]: http://rake.rubyforge.org/
 
-Quick notes
------------
-
-* Remember to develop the SubSetter pattern in its own gem.
+Quick notes (to self)
+---------------------
 
 * Rename FilesystemObject: Item, CommonMethods, AbstractFile, FastHelpers (think!)
 * Deliberate whether is a good idea to make Fast::Dir and Fast::File Multitons. (May be only when an absolute path is used)
@@ -103,16 +101,16 @@ Quick notes
 ### Fast::Dir
 * Calls to #dirs and #files should delegate to a SubSetter
 * Change the behaviour in the calls to #dirs and #files: return a new instance, with no @path setted.
-* Change the behaviour in the initialization: call list always if there's a path an the path matches an existing directory
-* Allow for easy recursive calls (#list_all, #files_all, #dirs_all for example)
-* Deliberate whether "#<<" should be kept in Fast::Dir and if it should be use as alias for merge
+* Change the behaviour in the initialization: call #list always if there's a path an the path matches an existing directory
+* Allow for easy recursive calls (#list_all, #files_all, #dirs_all for example, think of better synonyms)
+* Deliberate whether "#<<" should be kept in Fast::Dir and if it should be used as alias for merge
 * An instance of Fast::Dir should be possible to be created from a Array. (pity I didn't specified an usage case) 
 
 Remote future
 -------------
 
 * Make Fast a REST client (well, use <tt>rest-client</tt>) in order to transparently use files and directories from a compliant REST server. 
-* Include REST methods: Dir#post, File#get, File#head, etc
+* Include REST methods: Dir#post, File#get, File#head, etc and equivalents for local files (prepare ground for Piano Rest)
 * Allow Files to behave as Dirs with the right method calls
 
 License
