@@ -1,36 +1,37 @@
-= Fast 
+Fast
+==== 
 
-{<img src="https://secure.travis-ci.org/xaviervia/fast.png" />}[http://travis-ci.org/xaviervia/fast]
+[![Build Status](https://secure.travis-ci.org/xaviervia/fast.png)](http://travis-ci.org/xaviervia/fast)
 
 Tired of having a hard time working with files? Take a look at Fast...
 
-  require "fast"
+    require "fast"
+    
+    lib_dir = dir! :lib # Creates a new dir "lib"
+    
+    lib_dir["demo.txt"] = "I love creating files from a Hash-like API"  
+      # Creates lib/demo.txt containing the text
+    
+    lib_dir.list  # => ['demo.txt']
+    
+    file! "lib/empty.txt" # New file lib/empty.txt
+    
+    lib_dir.files do |path|
+      puts path
+    end # => demo.txt
+        #    empty.txt
   
-  lib_dir = dir! :lib # Creates a new dir "lib"
-  
-  lib_dir["demo.txt"] = "I love creating files from a Hash-like API"  
-    # Creates lib/demo.txt containing the text
-  
-  lib_dir.list  # => ['demo.txt']
-  
-  file! "lib/empty.txt" # New file lib/empty.txt
-  
-  lib_dir.files do |path|
-    puts path
-  end # => demo.txt
-      #    empty.txt
+    lib_dir.destroy
+    
+    dir? :lib     # => false
 
-  lib_dir.destroy
-  
-  dir? :lib     # => false
-
-...and finally is ((*quite stable*)) so you can use it if you wish so.
+...and finally is **quite stable** so you can use it if you wish so.
 
 Fast is a DSL for file and dir handling focused in intuitivity and semantics. Fast is pure Ruby, don't relays on OS functions, so is a little slower but more portable.
 
 == Installation
 
-  gem install fast
+    gem install fast
 
 == Usage
 
@@ -38,20 +39,20 @@ Fast declares two sets of methods in its DSL:
 
 === Dir methods
 
-  dir :lib                # The same as => Fast::Dir.new "lib"
-  dir.delete! "demo"      # The same as => Fast::Dir.new.delete! "demo"
+    dir :lib                # The same as => Fast::Dir.new "lib"
+    dir.delete! "demo"      # The same as => Fast::Dir.new.delete! "demo"
   
-  dir! :new_dir           # The same as => Fast::Dir.new.create! :new_dir
-  dir? :new_dir           # The same as => Fast::Dir.new.exist? :new_dir
+    dir! :new_dir           # The same as => Fast::Dir.new.create! :new_dir
+    dir? :new_dir           # The same as => Fast::Dir.new.exist? :new_dir
   
 === File methods
 
-  file "demo.txt"         # The same as => Fast::File.new "demo.txt"
-  file.copy "demo.txt", "new.txt"  # The same as =>
+    file "demo.txt"         # The same as => Fast::File.new "demo.txt"
+    file.copy "demo.txt", "new.txt"  # The same as =>
                           # Fast::File.new.copy "demo.txt", "new.txt"
                           
-  file! "demo.txt"        # The same as => Fast::File.new.create! "demo.txt"
-  file? "demo.txt"        # The same as => Fast::File.new.exist? "demo.txt"
+    file! "demo.txt"        # The same as => Fast::File.new.create! "demo.txt"
+    file? "demo.txt"        # The same as => Fast::File.new.exist? "demo.txt"
 
 == Philosophy
 
@@ -63,6 +64,25 @@ Fast declares two sets of methods in its DSL:
 * Files as IOs are still accessible through the harder-to-use native Ruby API
 
 <tt>Fast::Dir</tt> is a subclass of <tt>Array</tt>, usable as a hash, and <tt>Fast::File</tt> if a subclass of String.
+
+== Conflicts
+
+It is a known issue that the DSL of Fast conflicts with [Pry][pry-gem] and most notable with [Rake][rake-gem]; I am aware that is a bold move to reclaim `file` from the standard namespace for Fast to use.
+
+In order to workaround that, you can require fast in a not-so-much DSL way:
+
+    require "fast/fast"
+    
+    Fast.file "myfile.txt" # The same as `file "myfile.txt"`
+    
+    Fast.dir! :lib # etc...
+
+This is also the recommended form when using Fast in the context of a library. 
+
+> Also: try to avoid using Fast in a library, because Fast is mostly semantic sugar and you want to avoid adding loading time just for the sake of having a couple of convenience methods. Fast is more fun when used for code sketching and simple scripts.
+
+[pry-gem]: https://github.com/pry/pry
+[rake-gem]: http://rake.rubyforge.org/
 
 == Quick notes
 
