@@ -157,10 +157,10 @@ module Fast
     alias :unlink!  :delete!
     
     # Checks for existence. True if the directory exists, false otherwise
-    def exist? path = nil
-      @path = normalize path if path
-      ::File.directory? @path
-    end
+    #def exist? path = nil
+    #  @path = normalize path if path
+    #  ::File.directory? @path
+    #end
     
     alias :exists? :exist?
    
@@ -385,6 +385,10 @@ module Fast
         self.delete!
         
         target_dir
+      end
+
+      def do_exist? path
+        ::File.directory? path
       end
   end
 end
