@@ -402,6 +402,36 @@ describe Fast::File do
     end
   end
   
+  # Private method
+  describe "#do_exist?" do
+    context "it the file exist" do
+      it "should return true" do
+        ::File.should_not exist "demo.txt"
+        Fast::File.new.create "demo.txt"
+        file = Fast::File.new "demo.txt"
+        def file.call_do_exist?
+          do_exist? "demo.txt"
+        end
+        file.call_do_exist?.should === true
+      end   
+
+      after do
+        Fast::File.new.destroy! "demo.txt"
+      end
+    end
+
+    context "if the file does not exist" do
+      it "should return false" do
+        ::File.should_not exist "demo.txt"
+        file = Fast::File.new "demo.txt"
+        def file.call_do_exist?
+          do_exist? "demo.txt"
+        end
+        file.call_do_exist?.should === false        
+      end
+    end
+  end
+
   shared_examples_for "any file existencialism" do
     it "should return true if file exists" do
       pending "move partially to FilesystemObject"
@@ -424,23 +454,14 @@ describe Fast::File do
       Fast::File.new.send( @method, "demo" ).should be_false
       Fast::Dir.new.delete "demo"
     end
-  end
-  
-  describe "#exist?" do
-    before :each do @method = :exist? end
-    it_behaves_like "any file existencialism"
-  end
-  
-  describe "#exists?" do
-    before :each do @method = :exists? end
-    it_behaves_like "any file existencialism"
-  end
+  end  
   
   describe "#exist_all?" do
     before :each do @method = :exist_all? end
     it_behaves_like "any file existencialism"
     
     it "should return true if all exist" do
+      pending "Method being moved to Fast::FilesystemObject"
       # Create the demo files
       Fast::File.new.touch "demo1.txt", "demo2.txt", "demo3.txt"
       
@@ -449,6 +470,7 @@ describe Fast::File do
     end
     
     it "should return false if any does not exist" do
+      pending "Method being moved to Fast::FilesystemObject"
       Fast::File.new.touch "demo1.txt", "demo2.txt", "demo3.txt"
       Fast::File.new.should_not exist "demo4.txt"
       
@@ -468,6 +490,7 @@ describe Fast::File do
     it_behaves_like "any file existencialism"
     
     it "should return true if at least one exists" do
+      pending "Method being moved to Fast::FilesystemObject"
       Fast::File.new.touch "demo1.txt"
       Fast::File.new.should_not exist "demo2.txt"
       
@@ -475,6 +498,7 @@ describe Fast::File do
     end
     
     it "should return false if none exist" do
+      pending "Method being moved to Fast::FilesystemObject"
       Fast::File.new.should_not exist "demo2.txt"
       Fast::File.new.should_not exist "demo3.txt"
       
@@ -488,6 +512,7 @@ describe Fast::File do
   
   describe "#exist_which" do
     it "should return a list with the files that exist" do
+      pending "Method being moved to Fast::FilesystemObject"
       Fast::File.new.should_not exist "demo1.txt"
       Fast::File.new.should_not exist "demo2.txt"
       Fast::File.new.should_not exist "demo3.txt"
