@@ -498,6 +498,34 @@ describe Fast::Dir do
     end
   end
   
+  # Private method
+  describe "#do_exist?" do
+    context "if the path is a directory" do
+      it "should return true if the passed path is a directory" do
+        ::File.should_not be_directory "demo"
+        dir = Fast::Dir.new "demo"
+        dir.create!
+        def dir.call_do_exist?
+          do_exist? "demo"
+        end
+        dir.call_do_exist?.should === true
+      end
+  
+      after do
+        Fast::Dir.new.destroy! "demo"
+      end
+    end
+
+    it "should return false if the passed path is not a directory" do
+      ::File.should_not be_directory "demo"
+      dir = Fast::Dir.new "demo"
+      def dir.call_do_exist?
+        do_exist? "demo"
+      end
+      dir.call_do_exist?.should === false
+    end
+  end
+
   shared_examples_for "any dir existencialism" do
     it "should return true if the dir exists" do
       pending "move partially to FilesystemObject"
@@ -513,17 +541,7 @@ describe Fast::Dir do
       Fast::Dir.new.send( @method, "demo" ).should be_false
     end
   end
-  
-  describe "#exist?" do
-    before :each do @method = :exist? end
-    it_behaves_like "any dir existencialism"
-  end
-  
-  describe "#exists?" do
-    before :each do @method = :exists? end
-    it_behaves_like "any dir existencialism"
-  end
-  
+    
   describe "#exist_all?" do
     before :each do @method = :exist_all? end
     it_behaves_like "any dir existencialism"
