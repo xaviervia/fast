@@ -180,8 +180,6 @@ describe Fast::FilesystemObject do
   shared_examples_for "any single argument existencialism" do
     it_behaves_like "any item existencialism"
     
-    it "Fast::File#exist? & Fast::Dir#exist? should be replaced with these"
-    
     it "should not accept more than one argument" do
       o = Object.new
       o.extend Fast::FilesystemObject
@@ -258,13 +256,19 @@ describe Fast::FilesystemObject do
   describe "#exist_all?" do
     before { @method = :exist_all? }
     it_behaves_like "any item existencialism"
-    it "should implement mass checking of arguments"
+    
+    it "should return true if all item exist"
+
+    it "should return false if any item does not exist"
   end
   
   describe "#exist_any?" do
     before { @method = :exist_any? }
     it_behaves_like "any item existencialism"
-    it "should implement mass checking of arguments"
+
+    it "should return true if at least one item exists"
+
+    it "should return false if none exists"
   end
   
   # Private methods here
