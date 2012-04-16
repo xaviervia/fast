@@ -768,4 +768,26 @@ describe Fast::File do
       end
     end
   end
+
+  describe "#extension" do
+    context "a path is setted and it has extension" do
+      it "should return the extension"
+    end
+
+    context "a path is setted but has no extension" do
+      it "should return nil"
+    end
+    
+    context "a path is sent in the call and has extension" do
+      it "should return the extension"
+    end
+
+    context "a path is sent in the call but has no extension" do
+      it "should return nil" 
+    end
+
+    context "no path setted" do
+      it "should raise exception"
+    end
+  end
 end
