@@ -128,14 +128,6 @@ module Fast
       end
     end
 
-    # Returns true if file exists, false otherwise
-    #def exist? path = nil
-    #  @path = normalize path if path
-    #  do_check_existence @path
-    #end
-    
-    #alias :exists? :exist?
-    
     def exist_all? *args
       unless args.empty?
         return_me = true
