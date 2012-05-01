@@ -3,6 +3,8 @@ require "zucker/os"
 
 describe Fast::Dir do
   shared_examples_for "any dir list" do 
+    it "should return a list of Fast::Dir o Fast::File, not strings"
+
     context "a block is passed as an argument" do
       it "should pass each entry as argument to the block" do
         ::File.should_not be_directory "demo"
