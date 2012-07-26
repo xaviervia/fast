@@ -194,6 +194,11 @@ module Fast
 
       return existing_ones
     end
+    
+    # This will be ported to a pattern exactly like SubSetter
+    def to
+      Patterns::Adapter::Fast::Dir.new self
+    end
   
     # Returns a String brief of the dir
     def to_s
