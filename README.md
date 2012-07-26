@@ -105,6 +105,7 @@ Quick notes (to self)
 * Allow for easy recursive calls (#list_all, #files_all, #dirs_all for example, think of better synonyms)
 * Deliberate whether "#<<" should be kept in Fast::Dir and if it should be used as alias for merge
 * An instance of Fast::Dir should be possible to be created from a Array. (pity I didn't specified an usage case) 
+* Add documentation to Patterns::Adapter::Fast::Dir
 
 Remote future
 -------------
